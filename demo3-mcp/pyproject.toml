@@ -1,0 +1,12 @@
+[project]
+name = "demo3-mcp"
+version = "0.1"
+description = "OpenAI Agents SDK + Temporal demo with F1 MCP server"
+authors = [{ name = "Temporal Technologies Inc", email = "sdk@temporal.io" }]
+requires-python = ">=3.10"
+readme = "README.md"
+license = "MIT"
+dependencies = [
+    "temporalio[openai-agents,opentelemetry]>=1.17.0,<2",
+    "httpx>=0.27",
+]
