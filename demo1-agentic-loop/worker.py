@@ -1,14 +1,12 @@
 import asyncio
 
 from temporalio.client import Client
-from temporalio.worker import Worker
-from temporalio.envconfig import ClientConfig
-
-from workflows.agent import AgentWorkflow
-from activities import openai_responses, tool_invoker
 from temporalio.contrib.pydantic import pydantic_data_converter
+from temporalio.envconfig import ClientConfig
+from temporalio.worker import Worker
 
-from concurrent.futures import ThreadPoolExecutor
+from activities import openai_responses, tool_invoker
+from workflows.agent import AgentWorkflow
 
 
 async def main():
@@ -22,14 +20,11 @@ async def main():
     worker = Worker(
         client,
         task_queue="tool-invoking-agent-python-task-queue",
-        workflows=[
-            AgentWorkflow,
-        ],
+        workflows=[AgentWorkflow],
         activities=[
             openai_responses.create,
             tool_invoker.dynamic_tool_activity,
         ],
-        activity_executor=ThreadPoolExecutor(max_workers=10),
     )
     await worker.run()
 

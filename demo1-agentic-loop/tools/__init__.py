@@ -3,6 +3,8 @@
 
 from typing import Any, Awaitable, Callable
 
+from temporalio.exceptions import ApplicationError
+
 from .get_location import (
     GET_COORDINATES_TOOL_OAI,
     GET_IP_ADDRESS_TOOL_OAI,
@@ -25,7 +27,11 @@ def get_handler(tool_name: str) -> ToolHandler:
         return get_coordinates
     if tool_name == "get_weather":
         return get_weather
-    raise ValueError(f"Unknown tool name: {tool_name}")
+    raise ApplicationError(
+        f"Unknown tool name: {tool_name}",
+        type="UnknownTool",
+        non_retryable=True,
+    )
 
 
 def get_tools() -> list[dict[str, Any]]:

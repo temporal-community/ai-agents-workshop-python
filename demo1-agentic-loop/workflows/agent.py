@@ -17,11 +17,10 @@ class AgentWorkflow:
 
         # The agentic loop
         while True:
+            workflow.logger.info("=" * 80)
 
-            print(80 * "=")
-                
             # consult the LLM
-            result = await workflow.execute_activity(
+            llm_result = await workflow.execute_activity(
                 openai_responses.create,
                 openai_responses.OpenAIResponsesRequest(
                     model="gpt-4o",
@@ -29,34 +28,37 @@ class AgentWorkflow:
                     input=input_list,
                     tools=get_tools(),
                 ),
-                start_to_close_timeout=timedelta(seconds=30),
+                start_to_close_timeout=timedelta(seconds=60),
             )
 
-            # For this simple example, we only have one item in the output list
+            # For this simple example, we only have one item in the output list.
             # Either the LLM will have chosen a single function call or it will
             # have chosen to respond with a message.
-            item = result.output[0]
+            item = llm_result.output[0]
 
-            # Now process the LLM output to either call a tool or respond with a message.
-            
             # if the result is a tool call, call the tool
             if item.type == "function_call":
-                result = await self._handle_function_call(item, result, input_list)
-                
+                tool_output = await self._handle_function_call(item, llm_result, input_list)
+
                 # add the tool call result to the input list for context
-                input_list.append({"type": "function_call_output",
-                                    "call_id": item.call_id,
-                                    "output": result})
+                input_list.append({
+                    "type": "function_call_output",
+                    "call_id": item.call_id,
+                    "output": tool_output,
+                })
 
             # if the result is not a tool call we will just respond with a message
             else:
-                print(f"No tools chosen, responding with a message: {result.output_text}")
-                return result.output_text
+                workflow.logger.info(
+                    "No tools chosen, responding with a message: %s",
+                    llm_result.output_text,
+                )
+                return llm_result.output_text
 
 
-    async def _handle_function_call(self, item, result, input_list):
+    async def _handle_function_call(self, item, llm_result, input_list):
         # serialize the LLM output - the decision the LLM made to call a tool
-        i = result.output[0]
+        i = llm_result.output[0]
         input_list += [
             i.model_dump() if hasattr(i, "model_dump") else i
         ]
@@ -64,13 +66,13 @@ class AgentWorkflow:
         # and the arguments crafted by the LLM
         args = json.loads(item.arguments) if isinstance(item.arguments, str) else item.arguments
 
-        result = await workflow.execute_activity(
+        tool_output = await workflow.execute_activity(
             item.name,
             args,
             start_to_close_timeout=timedelta(seconds=30),
         )
 
-        print(f"Made a tool call to {item.name}")
+        workflow.logger.info("Made a tool call to %s", item.name)
 
-        return result
+        return tool_output
  
