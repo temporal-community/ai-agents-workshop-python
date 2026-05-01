@@ -28,7 +28,7 @@ MCP_SERVER_NAME = "f1-data"
 
 F1_MCP_SERVER_HOME = os.environ.get(
     "F1_MCP_SERVER_HOME",
-    os.path.expanduser("~/Projects/Temporal/AI/MCP/f1-mcp-server"),
+    "/root/f1-mcp-server",
 )
 
 
