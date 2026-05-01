@@ -1,4 +1,4 @@
-# ABOUTME: HITL workflow — combines weather activity-tools, F1 MCP tools, and an inline ask_user tool.
+# ABOUTME: HITL workflow -- combines weather activity-tools, F1 MCP tools, and an inline ask_user tool.
 # ask_user runs inside the workflow (not as an activity) so it can await workflow.wait_condition.
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from temporalio.contrib.openai_agents.workflow import (
 
 with workflow.unsafe.imports_passed_through():
     # Pre-import pydantic internals so the sandbox snapshots them before the
-    # first workflow task — avoids "Module X imported after initial workflow
+    # first workflow task -- avoids "Module X imported after initial workflow
     # load" warnings once the Agents SDK constructs its pydantic models.
     import annotated_types  # noqa: F401
     import pydantic_core  # noqa: F401
@@ -33,8 +33,10 @@ SYSTEM_PROMPT = """
 You are a helpful assistant. Use the provided tools to help accomplish the user's goal.
 Always use tools when they would help answer the question accurately.
 You have access to weather tools (geocoding, current weather) and Formula 1 race data tools (schedules, results, standings).
-If the user's request is ambiguous or you need more information, use the ask_user tool to ask them a question.
-When you have enough information to fully answer, provide your final response as plain text.
+IMPORTANT: You must NEVER answer a question by saying you need more information.
+If you need clarification, you MUST call the ask_user tool to get it. Do not provide a final answer
+that asks the user a question -- use the ask_user tool instead and wait for the response.
+Only provide a final text response when you have fully answered the user's goal using your tools.
 Today's date is {date}.
 """
 
@@ -42,7 +44,7 @@ Today's date is {date}.
 @workflow.defn
 class AgentWorkflow:
     def __init__(self) -> None:
-        # HITL state — mutated by the ask_user tool and the signal handler.
+        # HITL state -- mutated by the ask_user tool and the signal handler.
         self._input_needed: bool = False
         self._question: str = ""
         self._user_input: str = ""
@@ -52,12 +54,14 @@ class AgentWorkflow:
         today = workflow.now().strftime("%Y-%m-%d")
 
         # Inline tool: captures `self`, sets workflow state, and awaits
-        # workflow.wait_condition — so it must run in the workflow loop,
+        # workflow.wait_condition -- so it must run in the workflow loop,
         # not in an activity. @function_tool awaits async functions in the
         # caller's context, so Runner.run will invoke this right here.
         @function_tool
         async def ask_user(question_text: str) -> str:
             """Ask the user a question when you need clarification or more information.
+            You MUST use this tool whenever you need more information -- never ask
+            questions in your final response.
 
             Args:
                 question_text: The question to ask the user.

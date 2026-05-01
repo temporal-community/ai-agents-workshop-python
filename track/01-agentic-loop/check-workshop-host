@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-# Check that at least one workflow has completed on the demo1 task queue.
 set -euo pipefail
 
-set -a
-source /etc/environment
-set +a
-
 COMPLETED=$(temporal workflow list \
+    --address 127.0.0.1:7233 \
     --namespace default \
     --query 'TaskQueue="tool-invoking-agent-python-task-queue" AND ExecutionStatus="Completed"' \
     --limit 1 \

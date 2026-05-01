@@ -65,6 +65,13 @@ git clone https://github.com/rakeshgangwar/f1-mcp-server.git "${F1_MCP_HOME}"
 pushd "${F1_MCP_HOME}"
 git checkout "${F1_MCP_COMMIT}"
 
+# Patch the hardcoded Mac cache path in f1_data.py.
+# The upstream repo has fastf1.Cache.enable_cache('~/Documents/Cline/...') which
+# does not exist on the VM. The sed command below replaces that line with one
+# that resolves the cache directory relative to f1_data.py itself, landing at
+# /root/f1-mcp-server/cache/ -- the same path the pre-warm step uses below.
+sed -i "s|fastf1.Cache.enable_cache.*|import os\n_cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'cache')\nos.makedirs(_cache_dir, exist_ok=True)\nfastf1.Cache.enable_cache(_cache_dir)|" python/f1_data.py
+
 npm install
 npm run build
 
@@ -74,11 +81,13 @@ python3 -m venv .venv
 
 popd
 
-# 8. Pre-warm FastF1 cache
+# 8. Pre-warm FastF1 cache into /root/f1-mcp-server/cache/ -- the same location
+#    the patched f1_data.py uses. This avoids cold-cache timeouts during demos.
+mkdir -p "${F1_MCP_HOME}/cache"
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
 import os
-cache_dir = '/root/.cache/fastf1'
+cache_dir = '/root/f1-mcp-server/cache'
 os.makedirs(cache_dir, exist_ok=True)
 fastf1.Cache.enable_cache(cache_dir)
 try:
@@ -89,16 +98,7 @@ except Exception as e:
     print(f"FastF1 cache warm failed (non-fatal): {e}")
 EOF
 
-# 9. Write .env files for demos that need F1_MCP_SERVER_HOME.
-#    uv run loads .env automatically when UV_ENV_FILE=.env is set,
-#    bypassing all shell-sourcing issues entirely.
-for demo in demo3-mcp demo4-hitl; do
-    cat > "${WORKSPACE}/workshop/${demo}/.env" <<ENVFILE
-F1_MCP_SERVER_HOME=/root/f1-mcp-server
-ENVFILE
-done
-
-# 10. code-server
+# 9. code-server
 curl -fsSL https://code-server.dev/install.sh | sh
 
 mkdir -p /root/.local/share/code-server/User
@@ -129,7 +129,7 @@ Restart=always
 WantedBy=multi-user.target
 CSSVC
 
-# 11. Temporal dev server systemd service
+# 10. Temporal dev server systemd service
 cat > /etc/systemd/system/temporal-dev-server.service <<'TSVC'
 [Unit]
 Description=Temporal Dev Server
@@ -163,17 +163,13 @@ for i in $(seq 1 30); do
     sleep 3
 done
 
-# 12. Shell environment via /etc/bash.bashrc
-#     Sourced for all interactive bash sessions including Instruqt terminals.
-#     UV_ENV_FILE=.env tells uv run to load .env from the project directory,
-#     ensuring F1_MCP_SERVER_HOME reaches Python even in non-login shells.
+# 11. Shell environment via /etc/bash.bashrc
 cat >> /etc/bash.bashrc <<'BASHRC'
 
 # Workshop environment
 export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin
 export TEMPORAL_ADDRESS="127.0.0.1:7233"
 export F1_MCP_SERVER_HOME=/root/f1-mcp-server
-export UV_ENV_FILE=.env
 export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 
 if [ -f /usr/share/bash-completion/bash_completion ]; then
@@ -181,14 +177,10 @@ if [ -f /usr/share/bash-completion/bash_completion ]; then
 fi
 BASHRC
 
-# 13. OPENAI_API_KEY from Instruqt secret
+# 12. OPENAI_API_KEY from Instruqt secret
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
     echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
     echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/bash.bashrc
-    # Also add to the .env files so uv run picks it up
-    for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
-        echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> "${WORKSPACE}/workshop/${demo}/.env"
-    done
     echo "OPENAI_API_KEY injected from Instruqt secret"
 else
     echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"

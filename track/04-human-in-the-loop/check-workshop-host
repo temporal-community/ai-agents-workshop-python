@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
-# Check that a demo4 workflow completed AND received at least one signal.
 set -euo pipefail
 
-set -a
-source /etc/environment
-set +a
-
 COMPLETED=$(temporal workflow list \
+    --address 127.0.0.1:7233 \
     --namespace default \
     --query 'TaskQueue="hitl-agent-python-task-queue" AND ExecutionStatus="Completed"' \
     --limit 1 \
     2>/dev/null | grep -c "Completed" || true)
 
 if [[ "${COMPLETED}" -lt 1 ]]; then
-    echo "FAIL: No completed workflows found on demo4 task queue yet. Run a workflow and respond to the agent's question."
+    echo "FAIL: No completed workflows found on demo4 task queue yet. Complete a full HITL interaction first."
     exit 1
 fi
 
-echo "OK: At least one demo4 HITL workflow completed."
+echo "OK: At least one demo4 workflow completed."
 exit 0
