@@ -1,4 +1,4 @@
-# ABOUTME: Interactive starter for demo4 — polls for agent questions and signals user input back.
+# ABOUTME: Interactive starter for demo4 -- polls for agent questions and signals user input back.
 # Supports --workflow-id <id> to reconnect to an existing (waiting) workflow.
 
 import asyncio
@@ -55,7 +55,7 @@ async def _interact(handle) -> str:
         except Exception:
             # The workflow may not yet be ready for queries on its very first
             # task, or may have just completed between the done-check and the
-            # query. Either way, wait for the next tick and try again —
+            # query. Either way, wait for the next tick and try again --
             # result_task will fire if the workflow has actually finished.
             pass
 
@@ -87,16 +87,15 @@ async def main() -> None:
     client = await Client.connect(**config, plugins=[plugin])
 
     if workflow_id is not None:
-        # Reconnect to an existing workflow (it may be waiting for input).
         print(f"Reconnecting to workflow: {workflow_id}")
         handle = client.get_workflow_handle_for(AgentWorkflow.run, workflow_id)
         result = await _interact(handle)
     else:
-        # Start a new workflow. A trace context makes the Agents SDK
-        # tracing pipeline happy and avoids "No active trace" noise.
         new_id = f"hitl-agent-{uuid.uuid4()}"
         print(f"Starting workflow {new_id} with goal: {goal}")
-        with trace("AgentWorkflow"):
+        # disabled=True suppresses the "OPENAI_API_KEY not set, skipping trace export"
+        # warning. Participants observe execution via the Temporal UI instead.
+        with trace("AgentWorkflow", disabled=True):
             handle = await client.start_workflow(
                 AgentWorkflow.run,
                 goal,

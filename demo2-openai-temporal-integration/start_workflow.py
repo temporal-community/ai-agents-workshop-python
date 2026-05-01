@@ -1,4 +1,4 @@
-# ABOUTME: CLI starter for demo2 — submits a single ToolsWorkflow execution and prints the result.
+# ABOUTME: CLI starter for demo2 -- submits a single ToolsWorkflow execution and prints the result.
 
 import asyncio
 import sys
@@ -35,11 +35,9 @@ async def main() -> None:
         else "What is the weather in Tokyo?"
     )
 
-    # Opening a trace here propagates a trace context to the workflow via the
-    # plugin's interceptor. Without it, the workflow's executeWorkflow span
-    # would be created with no parent trace and the Agents SDK would log
-    # "No active trace" plus a 400 when exporting to OpenAI.
-    with trace("ToolsWorkflow"):
+    # disabled=True suppresses the "OPENAI_API_KEY not set, skipping trace export"
+    # warning. Participants observe execution via the Temporal UI instead.
+    with trace("ToolsWorkflow", disabled=True):
         result = await client.execute_workflow(
             ToolsWorkflow.run,
             query,

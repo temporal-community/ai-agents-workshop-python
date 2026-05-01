@@ -1,4 +1,4 @@
-# ABOUTME: CLI starter for demo3 — submits a single AgentWorkflow execution and prints the result.
+# ABOUTME: CLI starter for demo3 -- submits a single AgentWorkflow execution and prints the result.
 
 import asyncio
 import sys
@@ -19,10 +19,6 @@ from worker import MCP_SERVER_NAME, TASK_QUEUE, _f1_server_factory
 
 
 async def main() -> None:
-    # Same plugin config as the worker. The MCP factory is not invoked on the
-    # client — providers are lazy — but including the provider keeps the
-    # plugin config symmetric and makes the starter worker-ready if we ever
-    # run them co-located.
     plugin = OpenAIAgentsPlugin(
         model_params=ModelActivityParameters(
             start_to_close_timeout=timedelta(seconds=60),
@@ -45,11 +41,9 @@ async def main() -> None:
         else "When is the next F1 race and what will the weather be there?"
     )
 
-    # Opening a trace here propagates a trace context to the workflow via the
-    # plugin's interceptor. Without it, the workflow's executeWorkflow span
-    # would be created with no parent trace and the Agents SDK would log
-    # "No active trace" plus a 400 when exporting to OpenAI.
-    with trace("AgentWorkflow"):
+    # disabled=True suppresses the "OPENAI_API_KEY not set, skipping trace export"
+    # warning. Participants observe execution via the Temporal UI instead.
+    with trace("AgentWorkflow", disabled=True):
         result = await client.execute_workflow(
             AgentWorkflow.run,
             query,

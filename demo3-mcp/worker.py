@@ -46,6 +46,9 @@ def _f1_server_factory() -> MCPServerStdio:
             "args": ["-c", launch],
         },
         cache_tools_list=True,
+        # FastF1 downloads session data on first call, which can take 30+ seconds.
+        # The default 5s timeout is too short; use 120s to be safe.
+        client_session_timeout_seconds=120,
     )
 
 
