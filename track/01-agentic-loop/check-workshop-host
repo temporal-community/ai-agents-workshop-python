@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Check that at least one workflow has completed on the demo1 task queue.
+set -euo pipefail
+
+set -a
+source /etc/environment
+set +a
+
+COMPLETED=$(temporal workflow list \
+    --namespace default \
+    --query 'TaskQueue="tool-invoking-agent-python-task-queue" AND ExecutionStatus="Completed"' \
+    --limit 1 \
+    2>/dev/null | grep -c "Completed" || true)
+
+if [[ "${COMPLETED}" -lt 1 ]]; then
+    echo "FAIL: No completed workflows found on demo1 task queue yet. Run a workflow and wait for it to finish."
+    exit 1
+fi
+
+echo "OK: At least one demo1 workflow completed."
+exit 0

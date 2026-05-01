@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Challenge 00 cleanup — nothing to tear down.
+echo "Challenge 00 cleanup: OK"

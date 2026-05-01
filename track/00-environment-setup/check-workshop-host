@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Challenge 00 check — verify Temporal is healthy and OPENAI_API_KEY is set.
+set -euo pipefail
+
+# Source environment so vars written to /etc/environment are visible
+set -a
+source /etc/environment
+set +a
+
+# 1. Temporal dev server health
+if ! temporal operator cluster health 2>/dev/null | grep -q "SERVING"; then
+    echo "FAIL: Temporal dev server is not healthy. Check 'systemctl status temporal-dev-server'."
+    exit 1
+fi
+
+# 2. OpenAI API key present
+if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+    echo "FAIL: OPENAI_API_KEY is not set. Ask your facilitator for assistance."
+    exit 1
+fi
+
+echo "OK: Temporal healthy, OPENAI_API_KEY set."
+exit 0

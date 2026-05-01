@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Challenge 00 setup — services should already be running from track-level setup.
+# Just confirm they're up; restart if not.
+set -euo pipefail
+
+systemctl is-active temporal-dev-server || systemctl restart temporal-dev-server
+systemctl is-active code-server || systemctl restart code-server
+
+echo "Challenge 00 ready"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+set -a
+source /etc/environment
+set +a
+
+COMPLETED=$(temporal workflow list \
+    --namespace default \
+    --query 'TaskQueue="openai-agents-python-task-queue" AND ExecutionStatus="Completed"' \
+    --limit 1 \
+    2>/dev/null | grep -c "Completed" || true)
+
+if [[ "${COMPLETED}" -lt 1 ]]; then
+    echo "FAIL: No completed workflows found on demo2 task queue yet."
+    exit 1
+fi
+
+echo "OK: At least one demo2 workflow completed."
+exit 0

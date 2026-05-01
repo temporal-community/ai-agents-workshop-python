@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo "Challenge 02 cleanup: OK"
