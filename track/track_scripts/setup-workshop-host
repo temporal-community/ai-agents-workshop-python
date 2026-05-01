@@ -24,14 +24,15 @@ apt-get install -y --no-install-recommends \
     python3-venv \
     python3-dev
 
+# Make python resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 python --version
 
-# 2. uv to /usr/local/bin so it is on PATH for all users and services
+# 2. uv - install to /usr/local/bin so it is on PATH for all users and services
 curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 uv --version
 
-# 3. Node.js 20
+# 3. Node.js 20 (required by f1-mcp-server)
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
@@ -63,11 +64,14 @@ F1_MCP_COMMIT=73b95ecf75fcabbd25c68c3a57e784e529beb421
 git clone https://github.com/rakeshgangwar/f1-mcp-server.git "${F1_MCP_HOME}"
 pushd "${F1_MCP_HOME}"
 git checkout "${F1_MCP_COMMIT}"
+
 npm install
 npm run build
+
 python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install fastf1 pandas numpy
+
 popd
 
 # 8. Pre-warm FastF1 cache
@@ -116,7 +120,7 @@ Restart=always
 WantedBy=multi-user.target
 CSSVC
 
-# 10. Temporal dev server
+# 10. Temporal dev server systemd service
 cat > /etc/systemd/system/temporal-dev-server.service <<'TSVC'
 [Unit]
 Description=Temporal Dev Server
@@ -150,8 +154,8 @@ for i in $(seq 1 30); do
     sleep 3
 done
 
-# 11. Shell environment via profile.d so it is sourced for ALL shell types
-#     including Instruqt terminal sessions which may not source .bashrc
+# 11. Shell environment via profile.d - sourced for ALL shell types including
+#     Instruqt terminal sessions which do not reliably source .bashrc
 cat > /etc/profile.d/workshop.sh <<'PROFILE'
 export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin
 export TEMPORAL_ADDRESS="127.0.0.1:7233"
