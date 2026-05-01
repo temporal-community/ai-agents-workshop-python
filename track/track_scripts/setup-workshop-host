@@ -67,9 +67,7 @@ git checkout "${F1_MCP_COMMIT}"
 
 # Patch the hardcoded Mac cache path in f1_data.py.
 # The upstream repo has fastf1.Cache.enable_cache('~/Documents/Cline/...') which
-# does not exist on the VM. The sed command below replaces that line with one
-# that resolves the cache directory relative to f1_data.py itself, landing at
-# /root/f1-mcp-server/cache/ -- the same path the pre-warm step uses below.
+# does not exist on the VM. Replace with a path relative to the script file.
 sed -i "s|fastf1.Cache.enable_cache.*|import os\n_cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'cache')\nos.makedirs(_cache_dir, exist_ok=True)\nfastf1.Cache.enable_cache(_cache_dir)|" python/f1_data.py
 
 npm install
@@ -177,13 +175,16 @@ if [ -f /usr/share/bash-completion/bash_completion ]; then
 fi
 BASHRC
 
-# 12. OPENAI_API_KEY from Instruqt secret
-if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
-    echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/bash.bashrc
-    echo "OPENAI_API_KEY injected from Instruqt secret"
+# 12. OPENAI_API_KEY from Instruqt runtime parameter.
+#     The invite must be configured with a runtime parameter key named
+#     OPENAI_API_KEY pointing to the team secret. Instruqt injects it
+#     directly as that env var name in lifecycle scripts.
+if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+    echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> /etc/environment
+    echo "export OPENAI_API_KEY=${OPENAI_API_KEY}" >> /etc/bash.bashrc
+    echo "OPENAI_API_KEY injected successfully"
 else
-    echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"
+    echo "WARNING: OPENAI_API_KEY not set -- configure an invite runtime parameter"
 fi
 
 echo "=== setup-workshop-host complete ==="
