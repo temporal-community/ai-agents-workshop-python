@@ -1,0 +1,19 @@
+slug: building-durable-ai-agents-with-python-and-temporal
+title: Building Durable AI Agents with Python and Temporal
+teaser: A short description of the track.
+description: |-
+  A long description of the track.
+
+  You can use any GitHub flavoured markdown.
+icon: https://storage.googleapis.com/instruqt-frontend/img/tracks/default.png
+tags: []
+owner: temporal
+developers:
+- mmerrell@gmail.com
+lab_config:
+  sidebar_enabled: true
+  feedback_recap_enabled: true
+  feedback_tab_enabled: false
+  loadingMessages: true
+  hideStopButton: false
+enhanced_loading: false

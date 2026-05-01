@@ -1,17 +1,29 @@
 slug: temporal-python-ai-agents
-title: "Building Durable AI Agents with Python and Temporal"
+id: f6rjowkvvbfm
+title: Building Durable AI Agents with Python and Temporal
 description: |
   A progressive four-demo workshop that shows how to build production-grade AI
   agents using the OpenAI Agents SDK and Temporal for durable execution. Starting
   from a hand-written agentic loop, you'll add the OpenAI Agents SDK integration,
   MCP tool servers, and human-in-the-loop signals — observing each step in the
   Temporal Web UI.
-owner: temporal
+icon: ""
 tags:
-  - python
-  - temporal
-  - ai-agents
-  - openai
-  - mcp
-developers_only: false
+- mcp
+- openai
+- ai-agents
+- python
+- temporal
+owner: temporal
+developers: []
 show_timer: true
+idle_timeout: 300
+timelimit: 1200
+lab_config:
+  sidebar_enabled: true
+  feedback_recap_enabled: true
+  feedback_tab_enabled: false
+  loadingMessages: true
+  hideStopButton: false
+checksum: "12535243039668875840"
+enhanced_loading: false

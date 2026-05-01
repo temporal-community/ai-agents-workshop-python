@@ -1,39 +1,44 @@
 ---
 slug: mcp-tools
-id: mcp-tools
+id: rdzxrsbfsuvs
 type: challenge
-title: "Demo 3: MCP Tool Servers"
-teaser: "Add a Formula 1 data server via MCP. Each tool call becomes a durable Temporal activity."
+title: 'Demo 3: MCP Tool Servers'
+teaser: Add a Formula 1 data server via MCP. Each tool call becomes a durable Temporal
+  activity.
 notes:
-  - type: text
-    contents: |
-      ## Demo 3: MCP + Temporal
+- type: text
+  contents: |
+    ## Demo 3: MCP + Temporal
 
-      Model Context Protocol (MCP) is a standard for connecting AI agents to
-      external tool servers. Demo 3 adds an F1 race data server alongside the
-      existing weather tools.
+    Model Context Protocol (MCP) is a standard for connecting AI agents to
+    external tool servers. Demo 3 adds an F1 race data server alongside the
+    existing weather tools.
 
-      The key: `StatelessMCPServerProvider` routes every MCP operation through
-      Temporal. Each `listTools` and `callTool` becomes its own activity in the
-      workflow history — durable, retryable, and observable — without any extra
-      code from you.
+    The key: `StatelessMCPServerProvider` routes every MCP operation through
+    Temporal. Each `listTools` and `callTool` becomes its own activity in the
+    workflow history — durable, retryable, and observable — without any extra
+    code from you.
 
-      The agent can now answer questions that chain F1 data with weather:
-      "When is the next race and what will the weather be there?"
+    The agent can now answer questions that chain F1 data with weather:
+    "When is the next race and what will the weather be there?"
 tabs:
-  - title: Terminal
-    type: terminal
-    hostname: workshop-host
-  - title: Temporal UI
-    type: service
-    hostname: workshop-host
-    port: 8233
-  - title: Editor
-    type: service
-    hostname: workshop-host
-    port: 8080
+- id: khujr3sxpl3v
+  title: Terminal
+  type: terminal
+  hostname: workshop-host
+- id: lzzaloqoytcq
+  title: Temporal UI
+  type: service
+  hostname: workshop-host
+  port: 8233
+- id: uaiuwohwqfea
+  title: Editor
+  type: service
+  hostname: workshop-host
+  port: 8080
 difficulty: basic
 timelimit: 1500
+enhanced_loading: null
 ---
 
 # Demo 3: MCP Tool Servers

@@ -1,38 +1,42 @@
 ---
 slug: openai-agents-sdk
-id: openai-agents-sdk
+id: pg6xxx7txwrq
 type: challenge
-title: "Demo 2: OpenAI Agents SDK + Temporal Integration"
-teaser: "The same agent, but the SDK drives the loop. Temporal durability becomes automatic."
+title: 'Demo 2: OpenAI Agents SDK + Temporal Integration'
+teaser: The same agent, but the SDK drives the loop. Temporal durability becomes automatic.
 notes:
-  - type: text
-    contents: |
-      ## Demo 2: OpenAI Agents SDK + Temporal
+- type: text
+  contents: |
+    ## Demo 2: OpenAI Agents SDK + Temporal
 
-      Demo 1's workflow was ~50 lines of explicit loop logic. Demo 2 collapses
-      that to a single `Runner.run(...)` call.
+    Demo 1's workflow was ~50 lines of explicit loop logic. Demo 2 collapses
+    that to a single `Runner.run(...)` call.
 
-      The OpenAI Agents SDK drives the tool-calling loop. Temporal's
-      `OpenAIAgentsPlugin` intercepts it transparently: every LLM call and every
-      tool invocation becomes a Temporal activity automatically. The developer
-      writes standard SDK code; Temporal durability is free.
+    The OpenAI Agents SDK drives the tool-calling loop. Temporal's
+    `OpenAIAgentsPlugin` intercepts it transparently: every LLM call and every
+    tool invocation becomes a Temporal activity automatically. The developer
+    writes standard SDK code; Temporal durability is free.
 
-      The trade-off: tools must now be `@activity.defn` functions rather than
-      plain Python. They gain durability but they're no longer Temporal-agnostic.
+    The trade-off: tools must now be `@activity.defn` functions rather than
+    plain Python. They gain durability but they're no longer Temporal-agnostic.
 tabs:
-  - title: Terminal
-    type: terminal
-    hostname: workshop-host
-  - title: Temporal UI
-    type: service
-    hostname: workshop-host
-    port: 8233
-  - title: Editor
-    type: service
-    hostname: workshop-host
-    port: 8080
+- id: paamfrjtl6jp
+  title: Terminal
+  type: terminal
+  hostname: workshop-host
+- id: mzxhkdd9ly6f
+  title: Temporal UI
+  type: service
+  hostname: workshop-host
+  port: 8233
+- id: xxhzofvtcgdf
+  title: Editor
+  type: service
+  hostname: workshop-host
+  port: 8080
 difficulty: basic
 timelimit: 1200
+enhanced_loading: null
 ---
 
 # Demo 2: OpenAI Agents SDK + Temporal Integration

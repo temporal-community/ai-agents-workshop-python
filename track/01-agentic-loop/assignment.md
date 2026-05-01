@@ -1,38 +1,43 @@
 ---
 slug: agentic-loop
-id: agentic-loop
+id: xzmridxou6au
 type: challenge
-title: "Demo 1: The Hand-Written Agentic Loop"
-teaser: "Build an agentic loop from scratch as a Temporal workflow, and watch it survive failure."
+title: 'Demo 1: The Hand-Written Agentic Loop'
+teaser: Build an agentic loop from scratch as a Temporal workflow, and watch it survive
+  failure.
 notes:
-  - type: text
-    contents: |
-      ## Demo 1: The Agentic Loop
+- type: text
+  contents: |
+    ## Demo 1: The Agentic Loop
 
-      Most AI agent frameworks hide a loop from you: call the LLM, check if it
-      wants to use a tool, call the tool, feed the result back, repeat.
+    Most AI agent frameworks hide a loop from you: call the LLM, check if it
+    wants to use a tool, call the tool, feed the result back, repeat.
 
-      In Demo 1 we make that loop explicit — written by hand as a Temporal
-      workflow. The LLM call is one activity. Each tool dispatch is another
-      activity. Temporal's event history records every step.
+    In Demo 1 we make that loop explicit — written by hand as a Temporal
+    workflow. The LLM call is one activity. Each tool dispatch is another
+    activity. Temporal's event history records every step.
 
-      The payoff: if the worker crashes mid-loop, the workflow replays from
-      history and picks up exactly where it left off — no duplicate LLM calls,
-      no lost tool results.
+    The payoff: if the worker crashes mid-loop, the workflow replays from
+    history and picks up exactly where it left off — no duplicate LLM calls,
+    no lost tool results.
 tabs:
-  - title: Terminal
-    type: terminal
-    hostname: workshop-host
-  - title: Temporal UI
-    type: service
-    hostname: workshop-host
-    port: 8233
-  - title: Editor
-    type: service
-    hostname: workshop-host
-    port: 8080
+- id: dlcy32x3lwyw
+  title: Terminal
+  type: terminal
+  hostname: workshop-host
+- id: 4m0obiegxvsk
+  title: Temporal UI
+  type: service
+  hostname: workshop-host
+  port: 8233
+- id: b76krwtx7tyk
+  title: Editor
+  type: service
+  hostname: workshop-host
+  port: 8080
 difficulty: basic
 timelimit: 1200
+enhanced_loading: null
 ---
 
 # Demo 1: The Hand-Written Agentic Loop

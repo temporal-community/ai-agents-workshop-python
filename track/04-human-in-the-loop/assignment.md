@@ -1,42 +1,47 @@
 ---
 slug: human-in-the-loop
-id: human-in-the-loop
+id: jj9quaamkjwi
 type: challenge
-title: "Demo 4: Human-in-the-Loop"
-teaser: "The agent pauses mid-execution to ask you a question. A Temporal signal resumes it."
+title: 'Demo 4: Human-in-the-Loop'
+teaser: The agent pauses mid-execution to ask you a question. A Temporal signal resumes
+  it.
 notes:
-  - type: text
-    contents: |
-      ## Demo 4: Human-in-the-Loop
+- type: text
+  contents: |
+    ## Demo 4: Human-in-the-Loop
 
-      Sometimes an agent needs to ask a question before it can continue. Demo 4
-      adds that capability using three Temporal primitives working together:
+    Sometimes an agent needs to ask a question before it can continue. Demo 4
+    adds that capability using three Temporal primitives working together:
 
-      - An **`ask_user` tool** defined inside the workflow that calls
-        `workflow.wait_condition()` — suspending execution durably with no
-        worker resources consumed while waiting.
-      - A **signal** (`provide_user_input`) that delivers your answer and
-        unblocks the workflow.
-      - Two **queries** (`is_input_needed`, `get_pending_question`) that let
-        the starter poll to detect when the agent is waiting and what it asked.
+    - An **`ask_user` tool** defined inside the workflow that calls
+      `workflow.wait_condition()` — suspending execution durably with no
+      worker resources consumed while waiting.
+    - A **signal** (`provide_user_input`) that delivers your answer and
+      unblocks the workflow.
+    - Two **queries** (`is_input_needed`, `get_pending_question`) that let
+      the starter poll to detect when the agent is waiting and what it asked.
 
-      While the workflow is suspended, you could restart the worker, redeploy
-      your service, or wait days — the workflow will resume exactly where it
-      left off the moment the signal arrives.
+    While the workflow is suspended, you could restart the worker, redeploy
+    your service, or wait days — the workflow will resume exactly where it
+    left off the moment the signal arrives.
 tabs:
-  - title: Terminal
-    type: terminal
-    hostname: workshop-host
-  - title: Temporal UI
-    type: service
-    hostname: workshop-host
-    port: 8233
-  - title: Editor
-    type: service
-    hostname: workshop-host
-    port: 8080
+- id: fxsv3lucmj5e
+  title: Terminal
+  type: terminal
+  hostname: workshop-host
+- id: nxm6q05axvqh
+  title: Temporal UI
+  type: service
+  hostname: workshop-host
+  port: 8233
+- id: 0jpbuxjypy4y
+  title: Editor
+  type: service
+  hostname: workshop-host
+  port: 8080
 difficulty: basic
 timelimit: 1800
+enhanced_loading: null
 ---
 
 # Demo 4: Human-in-the-Loop
