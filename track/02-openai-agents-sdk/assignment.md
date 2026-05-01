@@ -35,8 +35,8 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
-- id: uyd8s2ka1lmn
-  title: Editor
+- id: l7jrbvxuygss
+  title: VS Code
   type: service
   hostname: workshop-host
   port: 8080
@@ -49,11 +49,11 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **Editor** tab and open `demo2-openai-temporal-integration`. Compare it to demo1:
+Click the **VS Code** tab and open `demo2-openai-temporal-integration`. Compare it to demo1:
 
-- `tools_workflow.py` — the entire agentic loop is now one line: `result = await Runner.run(agent, input=question)`
-- `tool_activities.py` — tools are `@activity.defn` functions. `activity_as_tool(...)` wraps each one for the SDK.
-- `worker.py` — the `OpenAIAgentsPlugin` is registered on both the client and worker. It installs the model-execution activity and interceptors automatically.
+- `tools_workflow.py` - the entire agentic loop is now one line: `result = await Runner.run(agent, input=question)`
+- `tool_activities.py` - tools are `@activity.defn` functions. `activity_as_tool(...)` wraps each one for the SDK.
+- `worker.py` - the `OpenAIAgentsPlugin` is registered on both the client and worker. It installs the model-execution activity and interceptors automatically.
 
 ## Run it
 
@@ -70,7 +70,7 @@ uv run python -m start_workflow "What is the weather in Tokyo?"
 ## Watch it in the Temporal UI
 
 Look at a completed workflow. The `InvokeModelActivity` appears as its own
-named entry — the SDK's model calls are now first-class Temporal activities,
+named entry - the SDK's model calls are now first-class Temporal activities,
 alongside the tool calls.
 
 Click **Check** when you've run at least one workflow successfully.

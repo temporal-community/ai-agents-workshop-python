@@ -1,4 +1,4 @@
-# ABOUTME: Worker for demo3 — registers weather activities plus the F1 MCP server provider.
+# ABOUTME: Worker for demo3 -- registers weather activities plus the F1 MCP server provider.
 # The plugin auto-registers MCP listTools/callTool activities from the provider.
 
 import asyncio
@@ -77,6 +77,10 @@ async def main() -> None:
             get_weather,
         ],
     )
+
+    print(f"Worker started. Listening on task queue: {TASK_QUEUE}")
+    print(f"F1 MCP server: {F1_MCP_SERVER_HOME}")
+    print("Ready -- run the starter in the other terminal.")
     await worker.run()
 
 

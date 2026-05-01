@@ -15,7 +15,7 @@ notes:
 
     The key: `StatelessMCPServerProvider` routes every MCP operation through
     Temporal. Each `listTools` and `callTool` becomes its own activity in the
-    workflow history — durable, retryable, and observable — without any extra
+    workflow history - durable, retryable, and observable - without any extra
     code from you.
 
     The agent can now answer questions that chain F1 data with weather:
@@ -36,8 +36,8 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
-- id: p9s3nxbqwert
-  title: Editor
+- id: vbd8hg4qij6x
+  title: VS Code
   type: service
   hostname: workshop-host
   port: 8080
@@ -50,13 +50,10 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **Editor** tab and open `demo3-mcp`:
+Click the **VS Code** tab and open `demo3-mcp`:
 
-- `worker.py` — a `StatelessMCPServerProvider` is registered with the plugin.
-  It launches the F1 MCP server process and wraps its operations as Temporal
-  activities automatically.
-- `tools_workflow.py` — `stateless_mcp_server("f1-data")` gives the agent a
-  handle to the MCP server. Eight F1 tools appear alongside the four weather tools.
+- `worker.py` - a `StatelessMCPServerProvider` is registered with the plugin. It launches the F1 MCP server process and wraps its operations as Temporal activities automatically.
+- `tools_workflow.py` - `stateless_mcp_server("f1-data")` gives the agent a handle to the MCP server. Eight F1 tools appear alongside the four weather tools.
 
 ## Run it
 
@@ -70,16 +67,15 @@ uv run python -m worker
 uv run python -m start_workflow "When is the next F1 race and what will the weather be there?"
 ```
 
-> The first workflow may take 15-30 seconds on the F1 tool calls while
-> FastF1 fetches session data. Subsequent runs are fast from the local cache.
+The first workflow may take 15-30 seconds on the F1 tool calls while FastF1 fetches session data. Subsequent runs are fast from the local cache.
 
 ## Watch it in the Temporal UI
 
 You'll see three kinds of activity entries in the workflow history:
 
-- `InvokeModelActivity` — LLM reasoning steps
+- `InvokeModelActivity` - LLM reasoning steps
 - Weather activities (`get_coordinates`, `get_weather`, etc.)
-- `f1-data-list-tools` and `f1-data-call-tool-v2` — MCP operations, each a durable activity
+- `f1-data-list-tools` and `f1-data-call-tool-v2` - MCP operations, each a durable activity
 
 ## Try more prompts
 

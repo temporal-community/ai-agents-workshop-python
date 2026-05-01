@@ -12,17 +12,17 @@ notes:
     Sometimes an agent needs to ask a question before it can continue. Demo 4
     adds that capability using three Temporal primitives working together:
 
-    - An **`ask_user` tool** defined inside the workflow that calls
-      `workflow.wait_condition()` — suspending execution durably with no
-      worker resources consumed while waiting.
-    - A **signal** (`provide_user_input`) that delivers your answer and
-      unblocks the workflow.
-    - Two **queries** (`is_input_needed`, `get_pending_question`) that let
-      the starter poll to detect when the agent is waiting and what it asked.
+    An `ask_user` tool defined inside the workflow calls `workflow.wait_condition()`
+    to suspend execution durably with no worker resources consumed while waiting.
+
+    A signal (`provide_user_input`) delivers your answer and unblocks the workflow.
+
+    Two queries (`is_input_needed`, `get_pending_question`) let the starter poll
+    to detect when the agent is waiting and what it asked.
 
     While the workflow is suspended, you could restart the worker, redeploy
-    your service, or wait days — the workflow will resume exactly where it
-    left off the moment the signal arrives.
+    your service, or wait days - the workflow resumes exactly where it left off
+    the moment the signal arrives.
 tabs:
 - id: fxsv3lucmj5e
   title: Worker
@@ -39,8 +39,8 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
-- id: m7r4kxcplqzy
-  title: Editor
+- id: 84uqxxylcabb
+  title: VS Code
   type: service
   hostname: workshop-host
   port: 8080
@@ -53,14 +53,10 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **Editor** tab and open `demo4-hitl`:
+Click the **VS Code** tab and open `demo4-hitl`:
 
-- `tools_workflow.py` — an `ask_user` `@function_tool` is defined *inside*
-  `run()` as a closure. It sets `self._input_needed = True` and blocks on
-  `await workflow.wait_condition(...)`. The signal handler flips the flag to unblock it.
-- `start_workflow.py` — polls queries every 2 seconds. When `is_input_needed`
-  is True, it prints the question, reads your response from the terminal, and
-  sends it as a signal.
+- `tools_workflow.py` - an `ask_user` `@function_tool` is defined inside `run()` as a closure. It sets `self._input_needed = True` and blocks on `await workflow.wait_condition(...)`. The signal handler flips the flag to unblock it.
+- `start_workflow.py` - polls queries every 2 seconds. When `is_input_needed` is True, it prints the question, reads your response from the terminal, and sends it as a signal.
 
 ## Run it
 
@@ -78,9 +74,9 @@ The agent will ask you which race you mean. Type your answer and press Enter.
 
 ## Watch the suspension in the Temporal UI
 
-While the workflow is waiting, the **Temporal UI** shows it as **Running** —
-but there are no pending activity tasks. The workflow is suspended on
-`wait_condition`. No worker threads are consumed.
+While the workflow is waiting, the **Temporal UI** shows it as **Running** but
+there are no pending activity tasks. The workflow is suspended on `wait_condition`.
+No worker threads are consumed.
 
 When you respond, watch a new event appear: the signal arrives, the
 `wait_condition` unblocks, and the agent continues.

@@ -4,8 +4,8 @@ title: Building Durable AI Agents with Python and Temporal
 description: |
   A progressive four-demo workshop that shows how to build production-grade AI
   agents using the OpenAI Agents SDK and Temporal for durable execution. Starting
-  from a hand-written agentic loop, you'll add the OpenAI Agents SDK integration,
-  MCP tool servers, and human-in-the-loop signals — observing each step in the
+  from a hand-written agentic loop, you will add the OpenAI Agents SDK integration,
+  MCP tool servers, and human-in-the-loop signals, observing each step in the
   Temporal Web UI.
 icon: ""
 tags:
@@ -17,7 +17,7 @@ tags:
 owner: temporal
 developers: []
 show_timer: true
-idle_timeout: 3600
+idle_timeout: 7200
 timelimit: 14400
 lab_config:
   sidebar_enabled: true

@@ -12,13 +12,13 @@ notes:
       In this workshop you'll work through four progressive demos that show what
       Temporal buys you at each stage of building a production AI agent.
 
-      Each demo adds exactly one new capability — so you can see the before and
+      Each demo adds exactly one new capability so you can see the before and
       after clearly in the Temporal Web UI.
 
       **What you'll build:**
       - Demo 1: A hand-written agentic loop as a Temporal workflow
       - Demo 2: The same agent, powered by the OpenAI Agents SDK + Temporal integration
-      - Demo 3: MCP tool servers — F1 race data alongside weather tools
+      - Demo 3: MCP tool servers - F1 race data alongside weather tools
       - Demo 4: Human-in-the-loop signals and queries
 
 tabs:
@@ -30,7 +30,7 @@ tabs:
     type: service
     hostname: workshop-host
     port: 8233
-  - title: Editor
+  - title: VS Code
     type: service
     hostname: workshop-host
     port: 8080
@@ -50,7 +50,7 @@ The Temporal dev server starts automatically. Confirm it's healthy:
 temporal operator cluster health
 ```
 
-You should see `SERVING`. You can also click the **Temporal UI** tab — you should see the Temporal Web UI with no workflows yet.
+You should see `SERVING`. You can also click the **Temporal UI** tab to see the Temporal Web UI with no workflows yet.
 
 ## 2. Verify your tools
 

@@ -1,4 +1,4 @@
-# ABOUTME: Worker for demo4 — same structure as demo3 (weather + F1 MCP), new task queue.
+# ABOUTME: Worker for demo4 -- same structure as demo3 (weather + F1 MCP), new task queue.
 # HITL state lives inside the workflow; no additional worker wiring needed.
 
 import asyncio
@@ -75,6 +75,10 @@ async def main() -> None:
             get_weather,
         ],
     )
+
+    print(f"Worker started. Listening on task queue: {TASK_QUEUE}")
+    print(f"F1 MCP server: {F1_MCP_SERVER_HOME}")
+    print("Ready -- run the starter in the other terminal.")
     await worker.run()
 
 

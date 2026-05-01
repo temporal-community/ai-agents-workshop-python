@@ -1,4 +1,4 @@
-# ABOUTME: Worker process for demo2 — registers the ToolsWorkflow and tool activities.
+# ABOUTME: Worker process for demo2 -- registers the ToolsWorkflow and tool activities.
 # Uses the OpenAIAgentsPlugin so the Agents SDK can run durably inside the workflow.
 
 import asyncio
@@ -46,6 +46,9 @@ async def main() -> None:
             get_weather,
         ],
     )
+
+    print(f"Worker started. Listening on task queue: {TASK_QUEUE}")
+    print("Ready -- run the starter in the other terminal.")
     await worker.run()
 
 

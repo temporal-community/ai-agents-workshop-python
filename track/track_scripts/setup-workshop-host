@@ -10,9 +10,7 @@ F1_MCP_HOME=/root/f1-mcp-server
 
 mkdir -p "${WORKSPACE}"
 
-# ---------------------------------------------------------------------------
 # 1. System packages
-# ---------------------------------------------------------------------------
 apt-get update -qq
 apt-get install -y --no-install-recommends \
     curl \
@@ -26,71 +24,53 @@ apt-get install -y --no-install-recommends \
     python3-venv \
     python3-dev
 
-# Make `python` resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 python --version
 
-# ---------------------------------------------------------------------------
-# 2. uv — install to /usr/local/bin so it's on PATH for all users/services
-# ---------------------------------------------------------------------------
+# 2. uv to /usr/local/bin so it is on PATH for all users and services
 curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 uv --version
 
-# ---------------------------------------------------------------------------
-# 3. Node.js 20 (required by f1-mcp-server)
-# ---------------------------------------------------------------------------
+# 3. Node.js 20
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
-# ---------------------------------------------------------------------------
 # 4. Temporal CLI
-# ---------------------------------------------------------------------------
 curl -sSf https://temporal.download/cli.sh | sh
 chmod +x /root/.temporalio/bin/temporal
 ln -sf /root/.temporalio/bin/temporal /usr/local/bin/temporal
 export PATH="${PATH}:/root/.temporalio/bin:/usr/local/bin"
 temporal --version
 
-# ---------------------------------------------------------------------------
 # 5. Clone workshop repo (instruqt branch)
-# ---------------------------------------------------------------------------
 git clone \
     --branch instruqt \
     https://github.com/temporal-community/ai-agents-workshop-python.git \
     "${WORKSPACE}/workshop"
 
-# ---------------------------------------------------------------------------
 # 6. Install Python dependencies for all four demos
-# ---------------------------------------------------------------------------
 for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
     pushd "${WORKSPACE}/workshop/${demo}"
     uv sync
     popd
 done
 
-# ---------------------------------------------------------------------------
 # 7. F1 MCP server (rakeshgangwar/f1-mcp-server, pinned commit)
-#    ⚠️  COMMIT PIN: Update this SHA before each workshop by running:
+#    COMMIT PIN: Update this SHA before each workshop by running:
 #        git ls-remote https://github.com/rakeshgangwar/f1-mcp-server HEAD
-# ---------------------------------------------------------------------------
 F1_MCP_COMMIT=73b95ecf75fcabbd25c68c3a57e784e529beb421
 
 git clone https://github.com/rakeshgangwar/f1-mcp-server.git "${F1_MCP_HOME}"
 pushd "${F1_MCP_HOME}"
 git checkout "${F1_MCP_COMMIT}"
-
 npm install
 npm run build
-
 python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install fastf1 pandas numpy
-
 popd
 
-# ---------------------------------------------------------------------------
 # 8. Pre-warm FastF1 cache
-# ---------------------------------------------------------------------------
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
 import os
@@ -105,9 +85,7 @@ except Exception as e:
     print(f"FastF1 cache warm failed (non-fatal): {e}")
 EOF
 
-# ---------------------------------------------------------------------------
 # 9. code-server
-# ---------------------------------------------------------------------------
 curl -fsSL https://code-server.dev/install.sh | sh
 
 mkdir -p /root/.local/share/code-server/User
@@ -138,9 +116,7 @@ Restart=always
 WantedBy=multi-user.target
 CSSVC
 
-# ---------------------------------------------------------------------------
-# 10. Temporal dev server systemd service
-# ---------------------------------------------------------------------------
+# 10. Temporal dev server
 cat > /etc/systemd/system/temporal-dev-server.service <<'TSVC'
 [Unit]
 Description=Temporal Dev Server
@@ -165,7 +141,6 @@ systemctl start code-server
 systemctl enable temporal-dev-server
 systemctl start temporal-dev-server
 
-# Wait for Temporal to be healthy
 echo "Waiting for Temporal server..."
 for i in $(seq 1 30); do
     if temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q SERVING; then
@@ -175,31 +150,28 @@ for i in $(seq 1 30); do
     sleep 3
 done
 
-# ---------------------------------------------------------------------------
-# 11. Shell environment — prompt, PATH, env vars, tab completion
-# ---------------------------------------------------------------------------
-cat >> /root/.bashrc <<'BASHRC'
-
-# Show working directory in prompt
-export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-
-# Temporal / workshop env
+# 11. Shell environment via profile.d so it is sourced for ALL shell types
+#     including Instruqt terminal sessions which may not source .bashrc
+cat > /etc/profile.d/workshop.sh <<'PROFILE'
 export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin
 export TEMPORAL_ADDRESS="127.0.0.1:7233"
 export F1_MCP_SERVER_HOME=/root/f1-mcp-server
-
-# Enable bash completion
+export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
 fi
-BASHRC
+PROFILE
 
-# ---------------------------------------------------------------------------
-# 12. Write OPENAI_API_KEY from Instruqt secret
-# ---------------------------------------------------------------------------
+chmod +x /etc/profile.d/workshop.sh
+
+# Also write key vars to /etc/environment for non-login subprocesses
+echo "F1_MCP_SERVER_HOME=/root/f1-mcp-server" >> /etc/environment
+echo "TEMPORAL_ADDRESS=127.0.0.1:7233" >> /etc/environment
+
+# 12. OPENAI_API_KEY from Instruqt secret
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
     echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /root/.bashrc
+    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/profile.d/workshop.sh
     echo "OPENAI_API_KEY injected from Instruqt secret"
 else
     echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"
