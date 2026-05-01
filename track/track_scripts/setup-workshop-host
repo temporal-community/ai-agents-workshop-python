@@ -86,7 +86,7 @@ done
 #    ⚠️  COMMIT PIN: Update this SHA before each workshop by running:
 #        git ls-remote https://github.com/rakeshgangwar/f1-mcp-server HEAD
 # ---------------------------------------------------------------------------
-F1_MCP_COMMIT="REPLACE_WITH_PINNED_SHA"  # <-- run the command above and paste here
+F1_MCP_COMMIT=73b95ecf75fcabbd25c68c3a57e784e529beb421
 
 git clone https://github.com/rakeshgangwar/f1-mcp-server.git "${F1_MCP_HOME}"
 pushd "${F1_MCP_HOME}"
