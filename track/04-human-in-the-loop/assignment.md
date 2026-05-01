@@ -3,8 +3,7 @@ slug: human-in-the-loop
 id: jj9quaamkjwi
 type: challenge
 title: 'Demo 4: Human-in-the-Loop'
-teaser: The agent pauses mid-execution to ask you a question. A Temporal signal resumes
-  it.
+teaser: The agent pauses mid-execution to ask you a question. A Temporal signal resumes it.
 notes:
 - type: text
   contents: |
@@ -26,15 +25,21 @@ notes:
     left off the moment the signal arrives.
 tabs:
 - id: fxsv3lucmj5e
-  title: Terminal
+  title: Worker
   type: terminal
   hostname: workshop-host
+  workdir: /workspace/workshop/demo4-hitl
 - id: nxm6q05axvqh
+  title: Starter
+  type: terminal
+  hostname: workshop-host
+  workdir: /workspace/workshop/demo4-hitl
+- id: 0jpbuxjypy4y
   title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- id: 0jpbuxjypy4y
+- id: m7r4kxcplqzy
   title: Editor
   type: service
   hostname: workshop-host
@@ -48,54 +53,45 @@ enhanced_loading: null
 
 ## What changed
 
-Open `/workspace/workshop/demo4-hitl` in the Editor:
+Click the **Editor** tab and open `demo4-hitl`:
 
 - `tools_workflow.py` — an `ask_user` `@function_tool` is defined *inside*
-  `run()` as a closure. It captures `self`, sets `self._input_needed = True`,
-  and blocks on `await workflow.wait_condition(...)`. The signal handler flips
-  the flag to unblock it.
-- `start_workflow.py` — the starter polls queries every 2 seconds. When it
-  detects `is_input_needed == True`, it reads your response from stdin and
+  `run()` as a closure. It sets `self._input_needed = True` and blocks on
+  `await workflow.wait_condition(...)`. The signal handler flips the flag to unblock it.
+- `start_workflow.py` — polls queries every 2 seconds. When `is_input_needed`
+  is True, it prints the question, reads your response from the terminal, and
   sends it as a signal.
 
 ## Run it
 
-**Terminal 1 — worker:**
-```bash
-cd /workspace/workshop/demo4-hitl
+**Worker tab:**
+```
 uv run python -m worker
 ```
 
-**Terminal 2 — workflow:**
-```bash
-cd /workspace/workshop/demo4-hitl
+**Starter tab:**
+```
 uv run python -m start_workflow "Should I bring rain gear to the F1 race?"
 ```
 
-The prompt is intentionally ambiguous. The agent will ask you which race you
-mean. Type your answer and press Enter.
+The agent will ask you which race you mean. Type your answer and press Enter.
 
 ## Watch the suspension in the Temporal UI
 
-While the workflow is waiting for your input, switch to the **Temporal UI**.
-The workflow shows as **Running** — but look at the event history. There are
-no pending activity tasks; the workflow is simply suspended on a
+While the workflow is waiting, the **Temporal UI** shows it as **Running** —
+but there are no pending activity tasks. The workflow is suspended on
 `wait_condition`. No worker threads are consumed.
 
-When you send your response, watch a new event appear: the signal arrives,
-the `wait_condition` unblocks, and the agent continues.
+When you respond, watch a new event appear: the signal arrives, the
+`wait_condition` unblocks, and the agent continues.
 
 ## Reconnect to a waiting workflow
 
-Close the starter terminal while the agent is waiting. The workflow keeps
-running on the server. Reconnect:
+If you close the Starter terminal while the agent is waiting, the workflow
+keeps running on the server. Find the workflow ID in the Temporal UI, then:
 
-```bash
-# Get the workflow ID from the Temporal UI, then:
+```
 uv run python -m start_workflow --workflow-id hitl-agent-<uuid>
 ```
 
-This demonstrates that the human interaction is decoupled from any particular
-process — the workflow state lives in Temporal, not in your starter script.
-
-Click **Check** when you've completed a full human-in-the-loop interaction.
+Click **Check** when you've completed a full interaction with the agent.

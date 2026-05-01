@@ -25,6 +25,7 @@ tabs:
   - title: Terminal
     type: terminal
     hostname: workshop-host
+    workdir: /workspace/workshop
   - title: Temporal UI
     type: service
     hostname: workshop-host
@@ -45,7 +46,7 @@ Let's make sure everything is running before we dive in.
 
 The Temporal dev server starts automatically. Confirm it's healthy:
 
-```bash
+```
 temporal operator cluster health
 ```
 
@@ -53,16 +54,16 @@ You should see `SERVING`. You can also click the **Temporal UI** tab — you sho
 
 ## 2. Verify your tools
 
-```bash
-python --version    # should be 3.10.x
+```
+python --version
 uv --version
 temporal --version
-node --version      # should be 20.x
+node --version
 ```
 
 ## 3. Verify your API key is set
 
-```bash
+```
 echo $OPENAI_API_KEY
 ```
 
@@ -70,9 +71,7 @@ You should see a key starting with `sk-`. If it's empty, let your facilitator kn
 
 ## 4. Explore the workshop repo
 
-Your workshop files are at `/workspace/workshop`. Take a minute to look at the structure:
-
-```bash
+```
 ls /workspace/workshop
 ```
 

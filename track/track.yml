@@ -17,13 +17,15 @@ tags:
 owner: temporal
 developers: []
 show_timer: true
-idle_timeout: 300
-timelimit: 1200
+idle_timeout: 3600
+timelimit: 14400
 lab_config:
   sidebar_enabled: true
   feedback_recap_enabled: true
   feedback_tab_enabled: false
   loadingMessages: true
   hideStopButton: false
-checksum: "16021502793474356796"
+  default_layout: AssignmentLeft
+  default_layout_sidebar_size: 40
+checksum: "16625321622980915279"
 enhanced_loading: false

@@ -22,7 +22,7 @@ apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     gnupg \
-    software-properties-common \
+    bash-completion \
     python3-venv \
     python3-dev
 
@@ -31,7 +31,7 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 python --version
 
 # ---------------------------------------------------------------------------
-# 2. uv
+# 2. uv — install to /usr/local/bin so it's on PATH for all users/services
 # ---------------------------------------------------------------------------
 curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 uv --version
@@ -49,11 +49,10 @@ curl -sSf https://temporal.download/cli.sh | sh
 chmod +x /root/.temporalio/bin/temporal
 ln -sf /root/.temporalio/bin/temporal /usr/local/bin/temporal
 export PATH="${PATH}:/root/.temporalio/bin:/usr/local/bin"
-echo 'export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin' >> /root/.bashrc
 temporal --version
 
 # ---------------------------------------------------------------------------
-# 5. Clone workshop repo (instruqt branch) into /workspace
+# 5. Clone workshop repo (instruqt branch)
 # ---------------------------------------------------------------------------
 git clone \
     --branch instruqt \
@@ -90,13 +89,7 @@ python3 -m venv .venv
 popd
 
 # ---------------------------------------------------------------------------
-# 8. F1_MCP_SERVER_HOME env var
-# ---------------------------------------------------------------------------
-echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /root/.bashrc
-echo "F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /etc/environment
-
-# ---------------------------------------------------------------------------
-# 9. Pre-warm FastF1 cache
+# 8. Pre-warm FastF1 cache
 # ---------------------------------------------------------------------------
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
@@ -113,7 +106,7 @@ except Exception as e:
 EOF
 
 # ---------------------------------------------------------------------------
-# 10. code-server
+# 9. code-server
 # ---------------------------------------------------------------------------
 curl -fsSL https://code-server.dev/install.sh | sh
 
@@ -146,7 +139,7 @@ WantedBy=multi-user.target
 CSSVC
 
 # ---------------------------------------------------------------------------
-# 11. Temporal dev server systemd service
+# 10. Temporal dev server systemd service
 # ---------------------------------------------------------------------------
 cat > /etc/systemd/system/temporal-dev-server.service <<'TSVC'
 [Unit]
@@ -172,7 +165,7 @@ systemctl start code-server
 systemctl enable temporal-dev-server
 systemctl start temporal-dev-server
 
-# Wait for Temporal to be healthy before declaring setup done
+# Wait for Temporal to be healthy
 echo "Waiting for Temporal server..."
 for i in $(seq 1 30); do
     if temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q SERVING; then
@@ -183,19 +176,30 @@ for i in $(seq 1 30); do
 done
 
 # ---------------------------------------------------------------------------
-# 12. Shell environment
+# 11. Shell environment — prompt, PATH, env vars, tab completion
 # ---------------------------------------------------------------------------
 cat >> /root/.bashrc <<'BASHRC'
+
+# Show working directory in prompt
+export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# Temporal / workshop env
+export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin
 export TEMPORAL_ADDRESS="127.0.0.1:7233"
 export F1_MCP_SERVER_HOME=/root/f1-mcp-server
+
+# Enable bash completion
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+fi
 BASHRC
 
 # ---------------------------------------------------------------------------
-# 13. Write OPENAI_API_KEY from Instruqt secret
+# 12. Write OPENAI_API_KEY from Instruqt secret
 # ---------------------------------------------------------------------------
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /root/.bashrc
     echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
+    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /root/.bashrc
     echo "OPENAI_API_KEY injected from Instruqt secret"
 else
     echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"

@@ -3,8 +3,7 @@ slug: agentic-loop
 id: xzmridxou6au
 type: challenge
 title: 'Demo 1: The Hand-Written Agentic Loop'
-teaser: Build an agentic loop from scratch as a Temporal workflow, and watch it survive
-  failure.
+teaser: Build an agentic loop from scratch as a Temporal workflow, and watch it survive failure.
 notes:
 - type: text
   contents: |
@@ -22,14 +21,15 @@ notes:
     no lost tool results.
 tabs:
 - id: dlcy32x3lwyw
-  title: Terminal
+  title: Worker
   type: terminal
   hostname: workshop-host
+  workdir: /workspace/workshop/demo1-agentic-loop
 - id: 4m0obiegxvsk
-  title: Temporal UI
-  type: service
+  title: Starter
+  type: terminal
   hostname: workshop-host
-  port: 8233
+  workdir: /workspace/workshop/demo1-agentic-loop
 - id: b76krwtx7tyk
   title: Editor
   type: service
@@ -44,7 +44,7 @@ enhanced_loading: null
 
 ## What you're looking at
 
-Open the Editor tab and navigate to `/workspace/workshop/demo1-agentic-loop`. The key files are:
+Click the **Editor** tab and open `demo1-agentic-loop`. The key files are:
 
 - `workflows/agent.py` — the `while True` loop: call LLM, dispatch tool if
   needed, repeat until the model returns a final answer
@@ -57,43 +57,29 @@ Open the Editor tab and navigate to `/workspace/workshop/demo1-agentic-loop`. Th
 
 ## Run it
 
-Open two terminals (use the `+` button to split).
-
-**Terminal 1 — start the worker:**
-```bash
-cd /workspace/workshop/demo1-agentic-loop
+**Worker tab — start the worker:**
+```
 uv run python -m worker
 ```
 
-**Terminal 2 — start a workflow:**
-```bash
-cd /workspace/workshop/demo1-agentic-loop
+**Starter tab — start a workflow:**
+```
 uv run python -m start_workflow "What is the weather in Barcelona?"
 ```
 
-## Watch it in the Temporal UI
-
-Switch to the **Temporal UI** tab. Click into the running (or completed)
-workflow. You'll see each LLM call and each tool invocation as a separate
-activity in the event history — the full decision trail of the agent.
-
 ## Try a multi-step prompt
 
-```bash
+```
 uv run python -m start_workflow "What is the weather where I am right now?"
 ```
 
-This one chains three tools: `get_ip_address` → `get_location_info` →
-`get_weather`. Watch the Temporal UI as each activity completes in sequence.
+This chains three tools: `get_ip_address` → `get_location_info` → `get_weather`.
 
 ## The durability point
 
-While a workflow is running, try stopping and restarting the worker:
+While a workflow is running, try stopping and restarting the worker in the Worker tab:
 
-```bash
-# In Terminal 1, press Ctrl+C, then immediately:
-uv run python -m worker
-```
+Press `Ctrl+C`, then run `uv run python -m worker` again.
 
 The workflow will resume from exactly where it left off — completed activities
 are not re-run. The event history is the source of truth.

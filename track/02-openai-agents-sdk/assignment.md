@@ -21,15 +21,21 @@ notes:
     plain Python. They gain durability but they're no longer Temporal-agnostic.
 tabs:
 - id: paamfrjtl6jp
-  title: Terminal
+  title: Worker
   type: terminal
   hostname: workshop-host
+  workdir: /workspace/workshop/demo2-openai-temporal-integration
 - id: mzxhkdd9ly6f
+  title: Starter
+  type: terminal
+  hostname: workshop-host
+  workdir: /workspace/workshop/demo2-openai-temporal-integration
+- id: xxhzofvtcgdf
   title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- id: xxhzofvtcgdf
+- id: uyd8s2ka1lmn
   title: Editor
   type: service
   hostname: workshop-host
@@ -43,37 +49,28 @@ enhanced_loading: null
 
 ## What changed
 
-Open `/workspace/workshop/demo2-openai-temporal-integration` in the Editor. Compare it to demo1:
+Click the **Editor** tab and open `demo2-openai-temporal-integration`. Compare it to demo1:
 
-- `tools_workflow.py` — the entire agentic loop is now `result = await Runner.run(agent, input=question)`. One line.
+- `tools_workflow.py` — the entire agentic loop is now one line: `result = await Runner.run(agent, input=question)`
 - `tool_activities.py` — tools are `@activity.defn` functions. `activity_as_tool(...)` wraps each one for the SDK.
 - `worker.py` — the `OpenAIAgentsPlugin` is registered on both the client and worker. It installs the model-execution activity and interceptors automatically.
 
 ## Run it
 
-**Terminal 1 — worker:**
-```bash
-cd /workspace/workshop/demo2-openai-temporal-integration
+**Worker tab:**
+```
 uv run python -m worker
 ```
 
-**Terminal 2 — workflow:**
-```bash
-cd /workspace/workshop/demo2-openai-temporal-integration
+**Starter tab:**
+```
 uv run python -m start_workflow "What is the weather in Tokyo?"
 ```
 
-## Compare in the Temporal UI
+## Watch it in the Temporal UI
 
-Look at a completed workflow from this demo alongside one from demo1. The
-activity sequence is the same: LLM call, tool call, LLM call, tool call...
-But in demo2 the `InvokeModelActivity` appears as its own named entry —
-the SDK's model calls are now first-class Temporal activities.
-
-## OpenAI Traces
-
-If you open [https://platform.openai.com/traces](https://platform.openai.com/traces)
-in a browser, you'll see the agent's reasoning trace alongside the Temporal
-event history — two complementary views of the same execution.
+Look at a completed workflow. The `InvokeModelActivity` appears as its own
+named entry — the SDK's model calls are now first-class Temporal activities,
+alongside the tool calls.
 
 Click **Check** when you've run at least one workflow successfully.
