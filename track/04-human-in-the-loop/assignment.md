@@ -40,6 +40,10 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
+- title: Network Control Panel
+  type: service
+  hostname: workshop-host
+  port: 5000
 - id: 84uqxxylcabb
   title: VS Code
   type: service

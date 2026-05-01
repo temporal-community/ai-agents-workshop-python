@@ -35,6 +35,10 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
+- title: Network Control Panel
+  type: service
+  hostname: workshop-host
+  port: 5000
 - id: l7jrbvxuygss
   title: VS Code
   type: service
@@ -72,5 +76,11 @@ uv run python -m start_workflow "What is the weather in Tokyo?"
 Look at a completed workflow. The `InvokeModelActivity` appears as its own
 named entry - the SDK's model calls are now first-class Temporal activities,
 alongside the tool calls.
+
+## Try disabling a service
+
+Start a new workflow, then use the **Network Control Panel** to disable Weather.
+Watch the weather activities fail and retry in the Temporal UI. Re-enable and
+watch the workflow succeed - no code changes required.
 
 Click **Check** when you've run at least one workflow successfully.

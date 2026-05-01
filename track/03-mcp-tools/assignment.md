@@ -37,6 +37,10 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
+- title: Network Control Panel
+  type: service
+  hostname: workshop-host
+  port: 5000
 - id: vbd8hg4qij6x
   title: VS Code
   type: service
@@ -77,6 +81,11 @@ You'll see three kinds of activity entries in the workflow history:
 - `InvokeModelActivity` - LLM reasoning steps
 - Weather activities (`get_coordinates`, `get_weather`, etc.)
 - `f1-data-list-tools` and `f1-data-call-tool-v2` - MCP operations, each a durable activity
+
+## Try disabling a service
+
+Use the **Network Control Panel** to disable F1 Data mid-workflow. Watch the
+MCP activities retry in the Temporal UI. Re-enable and watch them succeed.
 
 ## Try more prompts
 

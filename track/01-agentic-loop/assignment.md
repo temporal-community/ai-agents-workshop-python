@@ -36,6 +36,10 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
+- title: Network Control Panel
+  type: service
+  hostname: workshop-host
+  port: 5000
 - id: pjlbsyohlkk4
   title: VS Code
   type: service
@@ -87,10 +91,6 @@ This chains three tools: `get_ip_address` then `get_location_info` then `get_wea
 
 ## The durability point
 
-While a workflow is running, stop and restart the worker in the Worker tab.
-Press `Ctrl+C`, then run `uv run python -m worker` again.
-
-The workflow will resume from exactly where it left off - completed activities
-are not re-run. The event history is the source of truth.
+While a workflow is running, try disabling the Weather service in the **Network Control Panel** tab. Watch the activity fail and retry in the Temporal UI. Re-enable it and watch the workflow resume - zero code changes.
 
 Click **Check** when you've run at least one workflow successfully.
