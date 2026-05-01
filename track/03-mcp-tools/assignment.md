@@ -81,7 +81,7 @@ You'll see three kinds of activity entries in the workflow history:
 ## Try more prompts
 
 ```
-uv run python -m start_workflow "What is the 2025 F1 race calendar?"
+uv run python -m start_workflow "What is the 2026 F1 race calendar?"
 uv run python -m start_workflow "What were the results of the last Monaco Grand Prix?"
 ```
 

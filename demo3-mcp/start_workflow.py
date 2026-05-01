@@ -5,7 +5,6 @@ import sys
 import uuid
 from datetime import timedelta
 
-from agents import trace
 from temporalio.client import Client
 from temporalio.contrib.openai_agents import (
     ModelActivityParameters,
@@ -41,15 +40,12 @@ async def main() -> None:
         else "When is the next F1 race and what will the weather be there?"
     )
 
-    # disabled=True suppresses the "OPENAI_API_KEY not set, skipping trace export"
-    # warning. Participants observe execution via the Temporal UI instead.
-    with trace("AgentWorkflow", disabled=True):
-        result = await client.execute_workflow(
-            AgentWorkflow.run,
-            query,
-            id=f"f1-agent-demo-{uuid.uuid4()}",
-            task_queue=TASK_QUEUE,
-        )
+    result = await client.execute_workflow(
+        AgentWorkflow.run,
+        query,
+        id=f"f1-agent-demo-{uuid.uuid4()}",
+        task_queue=TASK_QUEUE,
+    )
     print(f"Result: {result}")
 
 

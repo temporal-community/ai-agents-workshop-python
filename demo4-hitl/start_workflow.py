@@ -6,7 +6,6 @@ import sys
 import uuid
 from datetime import timedelta
 
-from agents import trace
 from temporalio.client import Client
 from temporalio.contrib.openai_agents import (
     ModelActivityParameters,
@@ -53,10 +52,6 @@ async def _interact(handle) -> str:
                 await handle.signal(AgentWorkflow.provide_user_input, response)
                 print("Agent is working...")
         except Exception:
-            # The workflow may not yet be ready for queries on its very first
-            # task, or may have just completed between the done-check and the
-            # query. Either way, wait for the next tick and try again --
-            # result_task will fire if the workflow has actually finished.
             pass
 
         try:
@@ -93,16 +88,13 @@ async def main() -> None:
     else:
         new_id = f"hitl-agent-{uuid.uuid4()}"
         print(f"Starting workflow {new_id} with goal: {goal}")
-        # disabled=True suppresses the "OPENAI_API_KEY not set, skipping trace export"
-        # warning. Participants observe execution via the Temporal UI instead.
-        with trace("AgentWorkflow", disabled=True):
-            handle = await client.start_workflow(
-                AgentWorkflow.run,
-                goal,
-                id=new_id,
-                task_queue=TASK_QUEUE,
-            )
-            result = await _interact(handle)
+        handle = await client.start_workflow(
+            AgentWorkflow.run,
+            goal,
+            id=new_id,
+            task_queue=TASK_QUEUE,
+        )
+        result = await _interact(handle)
 
     print()
     print("=== Agent Result ===")

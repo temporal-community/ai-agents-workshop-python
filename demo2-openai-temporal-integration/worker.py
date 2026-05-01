@@ -2,6 +2,7 @@
 # Uses the OpenAIAgentsPlugin so the Agents SDK can run durably inside the workflow.
 
 import asyncio
+import os
 from datetime import timedelta
 
 from temporalio.client import Client
