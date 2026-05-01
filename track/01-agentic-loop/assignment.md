@@ -3,7 +3,8 @@ slug: agentic-loop
 id: xzmridxou6au
 type: challenge
 title: 'Demo 1: The Hand-Written Agentic Loop'
-teaser: Build an agentic loop from scratch as a Temporal workflow, and watch it survive failure.
+teaser: Build an agentic loop from scratch as a Temporal workflow, and watch it survive
+  failure.
 notes:
 - type: text
   contents: |
@@ -35,7 +36,8 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
-- title: VS Code
+- id: pjlbsyohlkk4
+  title: VS Code
   type: service
   hostname: workshop-host
   port: 8080

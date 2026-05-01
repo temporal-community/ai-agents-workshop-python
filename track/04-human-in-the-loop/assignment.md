@@ -3,7 +3,8 @@ slug: human-in-the-loop
 id: jj9quaamkjwi
 type: challenge
 title: 'Demo 4: Human-in-the-Loop'
-teaser: The agent pauses mid-execution to ask you a question. A Temporal signal resumes it.
+teaser: The agent pauses mid-execution to ask you a question. A Temporal signal resumes
+  it.
 notes:
 - type: text
   contents: |

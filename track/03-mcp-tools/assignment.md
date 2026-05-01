@@ -3,7 +3,8 @@ slug: mcp-tools
 id: rdzxrsbfsuvs
 type: challenge
 title: 'Demo 3: MCP Tool Servers'
-teaser: Add a Formula 1 data server via MCP. Each tool call becomes a durable Temporal activity.
+teaser: Add a Formula 1 data server via MCP. Each tool call becomes a durable Temporal
+  activity.
 notes:
 - type: text
   contents: |
