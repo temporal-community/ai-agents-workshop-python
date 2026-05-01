@@ -2,12 +2,23 @@
 # setup-workshop-host
 # Runs once at track creation. Bootstraps the full workshop environment.
 # Runtime: ~5-8 minutes depending on FastF1 cache warm.
+# NOTE: This script runs as root. The workshop user account is 'user'.
 set -euxo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 HOME_DIR=/home/user
 WORKSHOP_ROOT=${HOME_DIR}/workshop
 F1_MCP_HOME=${HOME_DIR}/f1-mcp-server
+
+# ---------------------------------------------------------------------------
+# 0. Ensure the 'user' home directory and shell config exist
+#    Instruqt VMs may not have fully provisioned the user account yet when
+#    this script runs.
+# ---------------------------------------------------------------------------
+mkdir -p "${HOME_DIR}"
+touch "${HOME_DIR}/.bashrc"
+touch "${HOME_DIR}/.profile"
+chown -R user:user "${HOME_DIR}"
 
 # ---------------------------------------------------------------------------
 # 1. System packages
@@ -31,12 +42,10 @@ apt-get install -y --no-install-recommends \
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # ---------------------------------------------------------------------------
-# 2. uv (fast Python package manager used by all demos)
+# 2. uv — install as root but into /usr/local so it's on PATH for all users
 # ---------------------------------------------------------------------------
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="${HOME_DIR}/.local/bin:${PATH}"
-echo 'export PATH="/home/user/.local/bin:$PATH"' >> /etc/environment
-echo 'export PATH="/home/user/.local/bin:$PATH"' >> "${HOME_DIR}/.bashrc"
+curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
+uv --version
 
 # ---------------------------------------------------------------------------
 # 3. Node.js 20 (required by f1-mcp-server)
@@ -97,7 +106,7 @@ chown -R user:user "${F1_MCP_HOME}"
 # ---------------------------------------------------------------------------
 # 8. F1_MCP_SERVER_HOME env var — worker.py reads this
 # ---------------------------------------------------------------------------
-echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /etc/environment
+echo "F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /etc/environment
 echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> "${HOME_DIR}/.bashrc"
 
 # ---------------------------------------------------------------------------
@@ -108,7 +117,10 @@ echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> "${HOME_DIR}/.bashrc"
 # ---------------------------------------------------------------------------
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
-fastf1.Cache.enable_cache('/home/user/.cache/fastf1')
+import os
+cache_dir = '/home/user/.cache/fastf1'
+os.makedirs(cache_dir, exist_ok=True)
+fastf1.Cache.enable_cache(cache_dir)
 try:
     session = fastf1.get_session(2024, 'Monaco', 'R')
     session.load(telemetry=False, weather=False, messages=False)
@@ -141,17 +153,13 @@ After=network.target
 [Service]
 Type=simple
 User=user
-Environment="PATH=/home/user/.local/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 ExecStart=/usr/bin/code-server --config /home/user/.config/code-server/config.yaml ${WORKSHOP_ROOT}
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 CSSVC
-
-systemctl daemon-reload
-systemctl enable code-server
-systemctl start code-server
 
 # ---------------------------------------------------------------------------
 # 11. Temporal dev server systemd service
@@ -164,7 +172,7 @@ After=network.target
 [Service]
 Type=simple
 User=user
-Environment="PATH=/home/user/.local/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 ExecStart=/usr/local/bin/temporal server start-dev --ui-port 8233
 Restart=always
 RestartSec=5
@@ -174,6 +182,8 @@ WantedBy=multi-user.target
 TSVC
 
 systemctl daemon-reload
+systemctl enable code-server
+systemctl start code-server
 systemctl enable temporal-dev-server
 systemctl start temporal-dev-server
 
@@ -181,13 +191,16 @@ systemctl start temporal-dev-server
 # 12. Write OPENAI_API_KEY from Instruqt secret into environment
 # ---------------------------------------------------------------------------
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
+    echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
     echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> "${HOME_DIR}/.bashrc"
     echo "OPENAI_API_KEY injected from Instruqt secret"
 else
     echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set — participants will need to export it manually"
 fi
 
+# ---------------------------------------------------------------------------
+# 13. Final ownership fix
+# ---------------------------------------------------------------------------
 chown -R user:user "${HOME_DIR}"
 
 echo "=== setup-workshop-host complete ==="
