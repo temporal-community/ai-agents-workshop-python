@@ -11,6 +11,8 @@ F1_MCP_HOME=${HOME_DIR}/f1-mcp-server
 
 # ---------------------------------------------------------------------------
 # 1. System packages
+#    Ubuntu 22.04 ships Python 3.10, which meets all pyproject.toml
+#    requirements (>=3.10). No PPA needed.
 # ---------------------------------------------------------------------------
 apt-get update -qq
 apt-get install -y --no-install-recommends \
@@ -22,46 +24,35 @@ apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     lsb-release \
-    software-properties-common
+    python3-venv \
+    python3-dev
+
+# Make `python` resolve to the system python3
+update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # ---------------------------------------------------------------------------
-# 2. Python 3.11 (via deadsnakes PPA — Ubuntu 22.04 ships 3.10, uv needs 3.10+)
-# ---------------------------------------------------------------------------
-add-apt-repository -y ppa:deadsnakes/ppa
-apt-get update -qq
-apt-get install -y --no-install-recommends \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev
-
-# Make python3 / python resolve to 3.11
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
-
-# ---------------------------------------------------------------------------
-# 3. uv (fast Python package manager used by all demos)
+# 2. uv (fast Python package manager used by all demos)
 # ---------------------------------------------------------------------------
 curl -LsSf https://astral.sh/uv/install.sh | sh
-# Add uv to PATH for all subsequent steps and for user shells
 export PATH="${HOME_DIR}/.local/bin:${PATH}"
 echo 'export PATH="/home/user/.local/bin:$PATH"' >> /etc/environment
 echo 'export PATH="/home/user/.local/bin:$PATH"' >> "${HOME_DIR}/.bashrc"
 
 # ---------------------------------------------------------------------------
-# 4. Node.js 20 (required by f1-mcp-server)
+# 3. Node.js 20 (required by f1-mcp-server)
 # ---------------------------------------------------------------------------
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
 # ---------------------------------------------------------------------------
-# 5. Temporal CLI
+# 4. Temporal CLI
 # ---------------------------------------------------------------------------
 TEMPORAL_VERSION="1.1.2"
 curl -sSf https://temporal.download/cli.sh | sh -s -- --version "${TEMPORAL_VERSION}"
 temporal --version
 
 # ---------------------------------------------------------------------------
-# 6. Clone workshop repo (instruqt branch)
+# 5. Clone workshop repo (instruqt branch)
 # ---------------------------------------------------------------------------
 git clone \
     --branch instruqt \
@@ -71,9 +62,8 @@ git clone \
 chown -R user:user "${WORKSHOP_ROOT}"
 
 # ---------------------------------------------------------------------------
-# 7. Install Python dependencies for all four demos
-#    uv sync in each demo directory pre-populates the .venv and uv cache so
-#    participants don't wait for downloads during the session.
+# 6. Install Python dependencies for all four demos
+#    uv sync pre-populates each .venv so participants don't wait on downloads.
 # ---------------------------------------------------------------------------
 for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
     pushd "${WORKSHOP_ROOT}/${demo}"
@@ -82,7 +72,7 @@ for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4
 done
 
 # ---------------------------------------------------------------------------
-# 8. F1 MCP server (rakeshgangwar/f1-mcp-server, pinned commit)
+# 7. F1 MCP server (rakeshgangwar/f1-mcp-server, pinned commit)
 #    ⚠️  COMMIT PIN: Update this SHA before each workshop by running:
 #        git ls-remote https://github.com/rakeshgangwar/f1-mcp-server HEAD
 # ---------------------------------------------------------------------------
@@ -96,8 +86,8 @@ git checkout "${F1_MCP_COMMIT}"
 npm install
 npm run build
 
-# Create the Python venv that the Node process shells out to for FastF1
-python3.11 -m venv .venv
+# Create the Python venv for FastF1 (uses system python3 = 3.10)
+python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install fastf1 pandas numpy
 
@@ -105,16 +95,16 @@ popd
 chown -R user:user "${F1_MCP_HOME}"
 
 # ---------------------------------------------------------------------------
-# 9. F1_MCP_SERVER_HOME env var — worker.py reads this
+# 8. F1_MCP_SERVER_HOME env var — worker.py reads this
 # ---------------------------------------------------------------------------
 echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /etc/environment
 echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> "${HOME_DIR}/.bashrc"
 
 # ---------------------------------------------------------------------------
-# 10. Pre-warm FastF1 cache for a recent known race
-#     FastF1 downloads ~50MB of timing data on first access; doing it now
-#     means demo3/4 don't stall on the first participant workflow.
-#     Uses the 2024 Monaco GP (always available, stable data).
+# 9. Pre-warm FastF1 cache for a recent known race
+#    FastF1 downloads ~50MB of timing data on first access; doing it now
+#    means demo3/4 don't stall on the first participant workflow.
+#    Uses the 2024 Monaco GP (always available, stable data).
 # ---------------------------------------------------------------------------
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
@@ -128,7 +118,7 @@ except Exception as e:
 EOF
 
 # ---------------------------------------------------------------------------
-# 11. code-server (VS Code in the browser)
+# 10. code-server (VS Code in the browser)
 # ---------------------------------------------------------------------------
 CODE_SERVER_VERSION="4.22.1"
 curl -fsSL "https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" \
@@ -136,7 +126,6 @@ curl -fsSL "https://github.com/coder/code-server/releases/download/v${CODE_SERVE
 dpkg -i /tmp/code-server.deb
 rm /tmp/code-server.deb
 
-# Configure code-server: no auth, open to workshop root
 mkdir -p "${HOME_DIR}/.config/code-server"
 cat > "${HOME_DIR}/.config/code-server/config.yaml" <<CSCFG
 bind-addr: 0.0.0.0:8080
@@ -144,7 +133,6 @@ auth: none
 cert: false
 CSCFG
 
-# Systemd service for code-server
 cat > /etc/systemd/system/code-server.service <<CSSVC
 [Unit]
 Description=code-server
@@ -166,8 +154,7 @@ systemctl enable code-server
 systemctl start code-server
 
 # ---------------------------------------------------------------------------
-# 12. Temporal dev server systemd service
-#     Starts automatically so it's ready when challenge 00 opens.
+# 11. Temporal dev server systemd service
 # ---------------------------------------------------------------------------
 cat > /etc/systemd/system/temporal-dev-server.service <<TSVC
 [Unit]
@@ -191,10 +178,7 @@ systemctl enable temporal-dev-server
 systemctl start temporal-dev-server
 
 # ---------------------------------------------------------------------------
-# 13. Write OPENAI_API_KEY from Instruqt secret into environment
-#     Instruqt injects $INSTRUQT_SECRET_OPENAI_API_KEY at provisioning time.
-#     We persist it to /etc/environment and .bashrc so it's available in
-#     every terminal and systemd service that needs it.
+# 12. Write OPENAI_API_KEY from Instruqt secret into environment
 # ---------------------------------------------------------------------------
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
     echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
