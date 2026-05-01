@@ -154,28 +154,27 @@ for i in $(seq 1 30); do
     sleep 3
 done
 
-# 11. Shell environment via profile.d - sourced for ALL shell types including
-#     Instruqt terminal sessions which do not reliably source .bashrc
-cat > /etc/profile.d/workshop.sh <<'PROFILE'
+# 11. Shell environment
+# Write to /etc/bash.bashrc - sourced for ALL interactive bash sessions
+# including Instruqt terminals which are interactive but not login shells.
+# This is more reliable than profile.d (login-only) or .bashrc (user-only).
+cat >> /etc/bash.bashrc <<'BASHRC'
+
+# Workshop environment
 export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin
 export TEMPORAL_ADDRESS="127.0.0.1:7233"
 export F1_MCP_SERVER_HOME=/root/f1-mcp-server
 export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
 if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
 fi
-PROFILE
-
-chmod +x /etc/profile.d/workshop.sh
-
-# Also write key vars to /etc/environment for non-login subprocesses
-echo "F1_MCP_SERVER_HOME=/root/f1-mcp-server" >> /etc/environment
-echo "TEMPORAL_ADDRESS=127.0.0.1:7233" >> /etc/environment
+BASHRC
 
 # 12. OPENAI_API_KEY from Instruqt secret
 if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
     echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/profile.d/workshop.sh
+    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/bash.bashrc
     echo "OPENAI_API_KEY injected from Instruqt secret"
 else
     echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"
