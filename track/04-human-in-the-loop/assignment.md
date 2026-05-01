@@ -48,7 +48,7 @@ enhanced_loading: null
 
 ## What changed
 
-Open `~/workshop/demo4-hitl` in the Editor:
+Open `/workspace/workshop/demo4-hitl` in the Editor:
 
 - `tools_workflow.py` — an `ask_user` `@function_tool` is defined *inside*
   `run()` as a closure. It captures `self`, sets `self._input_needed = True`,
@@ -62,13 +62,13 @@ Open `~/workshop/demo4-hitl` in the Editor:
 
 **Terminal 1 — worker:**
 ```bash
-cd ~/workshop/demo4-hitl
+cd /workspace/workshop/demo4-hitl
 uv run python -m worker
 ```
 
 **Terminal 2 — workflow:**
 ```bash
-cd ~/workshop/demo4-hitl
+cd /workspace/workshop/demo4-hitl
 uv run python -m start_workflow "Should I bring rain gear to the F1 race?"
 ```
 

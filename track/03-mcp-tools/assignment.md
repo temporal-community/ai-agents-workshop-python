@@ -45,7 +45,7 @@ enhanced_loading: null
 
 ## What changed
 
-Open `~/workshop/demo3-mcp` in the Editor:
+Open `/workspace/workshop/demo3-mcp` in the Editor:
 
 - `worker.py` — a `StatelessMCPServerProvider` is registered with the plugin.
   It launches the F1 MCP server process and wraps its operations as Temporal
@@ -59,13 +59,13 @@ Open `~/workshop/demo3-mcp` in the Editor:
 
 **Terminal 1 — worker:**
 ```bash
-cd ~/workshop/demo3-mcp
+cd /workspace/workshop/demo3-mcp
 uv run python -m worker
 ```
 
 **Terminal 2 — workflow:**
 ```bash
-cd ~/workshop/demo3-mcp
+cd /workspace/workshop/demo3-mcp
 uv run python -m start_workflow "When is the next F1 race and what will the weather be there?"
 ```
 

@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
 # setup-workshop-host
 # Runs once at track creation. Bootstraps the full workshop environment.
-# Runtime: ~5-8 minutes depending on FastF1 cache warm.
-# NOTE: This script runs as root. The workshop user account is 'user'.
+# NOTE: Runs as root. Working directory is /workspace.
 set -euxo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-HOME_DIR=/home/user
-WORKSHOP_ROOT=${HOME_DIR}/workshop
-F1_MCP_HOME=${HOME_DIR}/f1-mcp-server
+WORKSPACE=/workspace
+F1_MCP_HOME=/root/f1-mcp-server
 
-# ---------------------------------------------------------------------------
-# 0. Ensure the 'user' home directory and shell config exist
-#    Instruqt VMs may not have fully provisioned the user account yet when
-#    this script runs.
-# ---------------------------------------------------------------------------
-mkdir -p "${HOME_DIR}"
-touch "${HOME_DIR}/.bashrc"
-touch "${HOME_DIR}/.profile"
-chown -R user:user "${HOME_DIR}"
+mkdir -p "${WORKSPACE}"
 
 # ---------------------------------------------------------------------------
 # 1. System packages
-#    Ubuntu 22.04 ships Python 3.10, which meets all pyproject.toml
-#    requirements (>=3.10). No PPA needed.
 # ---------------------------------------------------------------------------
 apt-get update -qq
 apt-get install -y --no-install-recommends \
@@ -34,15 +22,16 @@ apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     gnupg \
-    lsb-release \
+    software-properties-common \
     python3-venv \
     python3-dev
 
-# Make `python` resolve to the system python3
+# Make `python` resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+python --version
 
 # ---------------------------------------------------------------------------
-# 2. uv — install as root but into /usr/local so it's on PATH for all users
+# 2. uv
 # ---------------------------------------------------------------------------
 curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 uv --version
@@ -56,27 +45,27 @@ apt-get install -y nodejs
 # ---------------------------------------------------------------------------
 # 4. Temporal CLI
 # ---------------------------------------------------------------------------
-TEMPORAL_VERSION="1.1.2"
-curl -sSf https://temporal.download/cli.sh | sh -s -- --version "${TEMPORAL_VERSION}"
+curl -sSf https://temporal.download/cli.sh | sh
+chmod +x /root/.temporalio/bin/temporal
+ln -sf /root/.temporalio/bin/temporal /usr/local/bin/temporal
+export PATH="${PATH}:/root/.temporalio/bin:/usr/local/bin"
+echo 'export PATH=$PATH:/root/.temporalio/bin:/usr/local/bin' >> /root/.bashrc
 temporal --version
 
 # ---------------------------------------------------------------------------
-# 5. Clone workshop repo (instruqt branch)
+# 5. Clone workshop repo (instruqt branch) into /workspace
 # ---------------------------------------------------------------------------
 git clone \
     --branch instruqt \
     https://github.com/temporal-community/ai-agents-workshop-python.git \
-    "${WORKSHOP_ROOT}"
-
-chown -R user:user "${WORKSHOP_ROOT}"
+    "${WORKSPACE}/workshop"
 
 # ---------------------------------------------------------------------------
 # 6. Install Python dependencies for all four demos
-#    uv sync pre-populates each .venv so participants don't wait on downloads.
 # ---------------------------------------------------------------------------
 for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
-    pushd "${WORKSHOP_ROOT}/${demo}"
-    sudo -u user uv sync
+    pushd "${WORKSPACE}/workshop/${demo}"
+    uv sync
     popd
 done
 
@@ -91,34 +80,28 @@ git clone https://github.com/rakeshgangwar/f1-mcp-server.git "${F1_MCP_HOME}"
 pushd "${F1_MCP_HOME}"
 git checkout "${F1_MCP_COMMIT}"
 
-# Build the Node.js TypeScript server
 npm install
 npm run build
 
-# Create the Python venv for FastF1 (uses system python3 = 3.10)
 python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install fastf1 pandas numpy
 
 popd
-chown -R user:user "${F1_MCP_HOME}"
 
 # ---------------------------------------------------------------------------
-# 8. F1_MCP_SERVER_HOME env var — worker.py reads this
+# 8. F1_MCP_SERVER_HOME env var
 # ---------------------------------------------------------------------------
+echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /root/.bashrc
 echo "F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> /etc/environment
-echo "export F1_MCP_SERVER_HOME=${F1_MCP_HOME}" >> "${HOME_DIR}/.bashrc"
 
 # ---------------------------------------------------------------------------
-# 9. Pre-warm FastF1 cache for a recent known race
-#    FastF1 downloads ~50MB of timing data on first access; doing it now
-#    means demo3/4 don't stall on the first participant workflow.
-#    Uses the 2024 Monaco GP (always available, stable data).
+# 9. Pre-warm FastF1 cache
 # ---------------------------------------------------------------------------
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
 import os
-cache_dir = '/home/user/.cache/fastf1'
+cache_dir = '/root/.cache/fastf1'
 os.makedirs(cache_dir, exist_ok=True)
 fastf1.Cache.enable_cache(cache_dir)
 try:
@@ -130,31 +113,32 @@ except Exception as e:
 EOF
 
 # ---------------------------------------------------------------------------
-# 10. code-server (VS Code in the browser)
+# 10. code-server
 # ---------------------------------------------------------------------------
-CODE_SERVER_VERSION="4.22.1"
-curl -fsSL "https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" \
-    -o /tmp/code-server.deb
-dpkg -i /tmp/code-server.deb
-rm /tmp/code-server.deb
+curl -fsSL https://code-server.dev/install.sh | sh
 
-mkdir -p "${HOME_DIR}/.config/code-server"
-cat > "${HOME_DIR}/.config/code-server/config.yaml" <<CSCFG
-bind-addr: 0.0.0.0:8080
-auth: none
-cert: false
-CSCFG
+mkdir -p /root/.local/share/code-server/User
+cat > /root/.local/share/code-server/User/settings.json <<'SETTINGS'
+{
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.startupEditor": "none",
+    "security.workspace.trust.enabled": false,
+    "editor.fontSize": 14,
+    "editor.tabSize": 4,
+    "workbench.activityBar.visible": false,
+    "workbench.statusBar.visible": true
+}
+SETTINGS
 
-cat > /etc/systemd/system/code-server.service <<CSSVC
+cat > /etc/systemd/system/code-server.service <<'CSSVC'
 [Unit]
 Description=code-server
 After=network.target
 
 [Service]
 Type=simple
-User=user
-Environment="PATH=/usr/local/bin:/usr/bin:/bin"
-ExecStart=/usr/bin/code-server --config /home/user/.config/code-server/config.yaml ${WORKSHOP_ROOT}
+User=root
+ExecStart=/usr/bin/code-server --host 0.0.0.0 --port 8080 --auth none /workspace/workshop
 Restart=always
 
 [Install]
@@ -164,18 +148,19 @@ CSSVC
 # ---------------------------------------------------------------------------
 # 11. Temporal dev server systemd service
 # ---------------------------------------------------------------------------
-cat > /etc/systemd/system/temporal-dev-server.service <<TSVC
+cat > /etc/systemd/system/temporal-dev-server.service <<'TSVC'
 [Unit]
 Description=Temporal Dev Server
 After=network.target
 
 [Service]
 Type=simple
-User=user
-Environment="PATH=/usr/local/bin:/usr/bin:/bin"
-ExecStart=/usr/local/bin/temporal server start-dev --ui-port 8233
+User=root
+ExecStart=/usr/local/bin/temporal server start-dev --ui-port 8233 --ip 0.0.0.0
 Restart=always
 RestartSec=5
+StandardOutput=append:/workspace/temporal.log
+StandardError=append:/workspace/temporal.log
 
 [Install]
 WantedBy=multi-user.target
@@ -187,20 +172,33 @@ systemctl start code-server
 systemctl enable temporal-dev-server
 systemctl start temporal-dev-server
 
-# ---------------------------------------------------------------------------
-# 12. Write OPENAI_API_KEY from Instruqt secret into environment
-# ---------------------------------------------------------------------------
-if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
-    echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
-    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> "${HOME_DIR}/.bashrc"
-    echo "OPENAI_API_KEY injected from Instruqt secret"
-else
-    echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set — participants will need to export it manually"
-fi
+# Wait for Temporal to be healthy before declaring setup done
+echo "Waiting for Temporal server..."
+for i in $(seq 1 30); do
+    if temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q SERVING; then
+        echo "Temporal server healthy."
+        break
+    fi
+    sleep 3
+done
 
 # ---------------------------------------------------------------------------
-# 13. Final ownership fix
+# 12. Shell environment
 # ---------------------------------------------------------------------------
-chown -R user:user "${HOME_DIR}"
+cat >> /root/.bashrc <<'BASHRC'
+export TEMPORAL_ADDRESS="127.0.0.1:7233"
+export F1_MCP_SERVER_HOME=/root/f1-mcp-server
+BASHRC
+
+# ---------------------------------------------------------------------------
+# 13. Write OPENAI_API_KEY from Instruqt secret
+# ---------------------------------------------------------------------------
+if [[ -n "${INSTRUQT_SECRET_OPENAI_API_KEY:-}" ]]; then
+    echo "export OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /root/.bashrc
+    echo "OPENAI_API_KEY=${INSTRUQT_SECRET_OPENAI_API_KEY}" >> /etc/environment
+    echo "OPENAI_API_KEY injected from Instruqt secret"
+else
+    echo "WARNING: INSTRUQT_SECRET_OPENAI_API_KEY not set"
+fi
 
 echo "=== setup-workshop-host complete ==="

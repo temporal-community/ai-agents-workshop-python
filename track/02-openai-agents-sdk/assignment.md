@@ -43,8 +43,7 @@ enhanced_loading: null
 
 ## What changed
 
-Open `~/workshop/demo2-openai-temporal-integration` in the Editor. Compare it
-to demo1:
+Open `/workspace/workshop/demo2-openai-temporal-integration` in the Editor. Compare it to demo1:
 
 - `tools_workflow.py` — the entire agentic loop is now `result = await Runner.run(agent, input=question)`. One line.
 - `tool_activities.py` — tools are `@activity.defn` functions. `activity_as_tool(...)` wraps each one for the SDK.
@@ -54,13 +53,13 @@ to demo1:
 
 **Terminal 1 — worker:**
 ```bash
-cd ~/workshop/demo2-openai-temporal-integration
+cd /workspace/workshop/demo2-openai-temporal-integration
 uv run python -m worker
 ```
 
 **Terminal 2 — workflow:**
 ```bash
-cd ~/workshop/demo2-openai-temporal-integration
+cd /workspace/workshop/demo2-openai-temporal-integration
 uv run python -m start_workflow "What is the weather in Tokyo?"
 ```
 

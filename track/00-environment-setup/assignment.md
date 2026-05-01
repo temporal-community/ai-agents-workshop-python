@@ -54,7 +54,7 @@ You should see `SERVING`. You can also click the **Temporal UI** tab — you sho
 ## 2. Verify your tools
 
 ```bash
-python --version    # should be 3.11.x
+python --version    # should be 3.10.x
 uv --version
 temporal --version
 node --version      # should be 20.x
@@ -70,10 +70,10 @@ You should see a key starting with `sk-`. If it's empty, let your facilitator kn
 
 ## 4. Explore the workshop repo
 
-Your workshop files are at `~/workshop`. Take a minute to look at the structure:
+Your workshop files are at `/workspace/workshop`. Take a minute to look at the structure:
 
 ```bash
-ls ~/workshop
+ls /workspace/workshop
 ```
 
 You'll see four demo directories. Each is self-contained with its own dependencies and task queue. Click **Check** when you're ready to continue.

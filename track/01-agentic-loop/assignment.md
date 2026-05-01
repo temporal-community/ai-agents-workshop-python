@@ -44,8 +44,7 @@ enhanced_loading: null
 
 ## What you're looking at
 
-Open the Editor tab and navigate to `~/workshop/demo1-agentic-loop`. The key
-files are:
+Open the Editor tab and navigate to `/workspace/workshop/demo1-agentic-loop`. The key files are:
 
 - `workflows/agent.py` — the `while True` loop: call LLM, dispatch tool if
   needed, repeat until the model returns a final answer
@@ -62,13 +61,13 @@ Open two terminals (use the `+` button to split).
 
 **Terminal 1 — start the worker:**
 ```bash
-cd ~/workshop/demo1-agentic-loop
+cd /workspace/workshop/demo1-agentic-loop
 uv run python -m worker
 ```
 
 **Terminal 2 — start a workflow:**
 ```bash
-cd ~/workshop/demo1-agentic-loop
+cd /workspace/workshop/demo1-agentic-loop
 uv run python -m start_workflow "What is the weather in Barcelona?"
 ```
 
