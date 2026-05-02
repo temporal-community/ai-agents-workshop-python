@@ -43,7 +43,7 @@ tabs:
   hostname: workshop-host
   port: 5000
 - id: vbd8hg4qij6x
-  title: VS Code
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
@@ -56,7 +56,7 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **VS Code** tab and open `demo3-mcp`:
+Click the **Editor** tab and open `demo3-mcp`:
 
 - `worker.py` - a `StatelessMCPServerProvider` is registered with the plugin. It launches the F1 MCP server process and wraps its operations as Temporal activities automatically.
 - `tools_workflow.py` - `stateless_mcp_server("f1-data")` gives the agent a handle to the MCP server. Eight F1 tools appear alongside the four weather tools.
@@ -85,8 +85,8 @@ You'll see three kinds of activity entries in the workflow history:
 
 ## Try disabling a service
 
-Use the **Network Control Panel** to disable F1 Data mid-workflow. Watch the
-MCP activities retry in the Temporal UI. Re-enable and watch them succeed.
+Use the **Network Control Panel** to disable Weather mid-workflow. Watch the
+weather activities fail and retry in the Temporal UI. Re-enable and watch them succeed.
 
 ## Try more prompts
 

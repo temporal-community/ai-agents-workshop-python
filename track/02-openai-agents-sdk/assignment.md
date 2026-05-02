@@ -41,7 +41,7 @@ tabs:
   hostname: workshop-host
   port: 5000
 - id: l7jrbvxuygss
-  title: VS Code
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
@@ -54,7 +54,7 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **VS Code** tab and open `demo2-openai-temporal-integration`. Compare it to demo1:
+Click the **Editor** tab and open `demo2-openai-temporal-integration`. Compare it to demo1:
 
 - `tools_workflow.py` - the entire agentic loop is now one line: `result = await Runner.run(agent, input=question)`
 - `tool_activities.py` - tools are `@activity.defn` functions. `activity_as_tool(...)` wraps each one for the SDK.

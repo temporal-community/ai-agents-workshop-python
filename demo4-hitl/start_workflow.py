@@ -18,7 +18,7 @@ from tools_workflow import AgentWorkflow
 from worker import MCP_SERVER_NAME, TASK_QUEUE, _f1_server_factory
 
 POLL_INTERVAL_SECONDS = 2.0
-DEFAULT_QUERY = "Should I bring rain gear to the F1 race?"
+DEFAULT_QUERY = "What's the weather like where I'm traveling to this weekend?"
 
 
 def _parse_args(argv: list[str]) -> tuple[str | None, str | None]:

@@ -42,7 +42,7 @@ tabs:
   hostname: workshop-host
   port: 5000
 - id: pjlbsyohlkk4
-  title: VS Code
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
@@ -55,7 +55,7 @@ enhanced_loading: null
 
 ## What you're looking at
 
-Click the **VS Code** tab and open `demo1-agentic-loop`. The key files are:
+Click the **Editor** tab and open `demo1-agentic-loop`. The key files are:
 
 - `workflows/agent.py` - the `while True` loop: call LLM, dispatch tool if needed, repeat until the model returns a final answer
 - `activities/openai_responses.py` - the LLM activity: sends the conversation history to OpenAI and returns the model's response

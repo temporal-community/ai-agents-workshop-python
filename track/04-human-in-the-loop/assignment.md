@@ -46,7 +46,7 @@ tabs:
   hostname: workshop-host
   port: 5000
 - id: 84uqxxylcabb
-  title: VS Code
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
@@ -59,7 +59,7 @@ enhanced_loading: null
 
 ## What changed
 
-Click the **VS Code** tab and open `demo4-hitl`:
+Click the **Editor** tab and open `demo4-hitl`:
 
 - `tools_workflow.py` - an `ask_user` `@function_tool` is defined inside `run()` as a closure. It sets `self._input_needed = True` and blocks on `await workflow.wait_condition(...)`. The signal handler flips the flag to unblock it.
 - `start_workflow.py` - polls queries every 2 seconds. When `is_input_needed` is True, it prints the question, reads your response from the terminal, and sends it as a signal.
@@ -73,10 +73,10 @@ uv run python -m worker
 
 **Starter tab:**
 ```
-uv run python -m start_workflow "Should I bring rain gear to the F1 race?"
+uv run python -m start_workflow "What's the weather like where I'm traveling to this weekend?"
 ```
 
-The agent will ask you which race you mean. Type your answer and press Enter.
+The agent can't answer without knowing where you're going. It will use the `ask_user` tool to pause and ask you. Type your destination and press Enter.
 
 ## Watch the suspension in the Temporal UI
 

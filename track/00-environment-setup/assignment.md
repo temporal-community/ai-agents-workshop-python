@@ -34,7 +34,7 @@ tabs:
     type: service
     hostname: workshop-host
     port: 5000
-  - title: VS Code
+  - title: Editor
     type: service
     hostname: workshop-host
     port: 8080
@@ -75,7 +75,7 @@ You should see a key starting with `sk-`. If it's empty, let your facilitator kn
 
 ## 4. Check the Network Control Panel
 
-Click the **Network Control Panel** tab. You should see all five services showing green. This panel lets your facilitator toggle external services on and off during demos to show Temporal's retry behavior.
+Click the **Network Control Panel** tab. You should see all four services showing green. This panel lets your facilitator toggle external services on and off during demos to show Temporal's retry behavior.
 
 ## 5. Explore the workshop repo
 
