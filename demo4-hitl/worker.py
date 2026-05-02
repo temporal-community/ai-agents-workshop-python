@@ -5,6 +5,10 @@ import asyncio
 import os
 from datetime import timedelta
 
+# Disable OpenAI Agents SDK trace export. No trace server is configured in
+# the workshop environment and the warnings are confusing for participants.
+os.environ["OPENAI_AGENTS_DISABLE_TRACING"] = "1"
+
 from agents.mcp import MCPServerStdio
 from temporalio.client import Client
 from temporalio.contrib.openai_agents import (

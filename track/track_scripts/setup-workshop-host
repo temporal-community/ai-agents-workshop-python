@@ -143,8 +143,7 @@ State file format:
     "openai":      true,
     "weather":     true,
     "geolocation": true,
-    "ipinfo":      true,
-    "f1":          true
+    "ipinfo":      true
   }
 }
 A value of true means the service is ALLOWED through.
@@ -159,7 +158,6 @@ SERVICE_HOSTS = {
     "weather":     ["api.open-meteo.com", "geocoding-api.open-meteo.com"],
     "geolocation": ["ip-api.com"],
     "ipinfo":      ["icanhazip.com"],
-    "f1":          ["ergast.com", "api.openf1.org", "livetiming.formula1.com"],
 }
 
 DEFAULT_STATE = {
@@ -205,8 +203,7 @@ cat > /workspace/proxy/state.json <<'EOF'
     "openai": true,
     "weather": true,
     "geolocation": true,
-    "ipinfo": true,
-    "f1": true
+    "ipinfo": true
   }
 }
 EOF
@@ -255,7 +252,6 @@ DEFAULT_STATE = {
         "weather": True,
         "geolocation": True,
         "ipinfo": True,
-        "f1": True,
     },
 }
 
@@ -264,7 +260,6 @@ SERVICE_LABELS = {
     "weather":     "Weather  (api.open-meteo.com)",
     "geolocation": "Geolocation  (ip-api.com)",
     "ipinfo":      "IP Info  (icanhazip.com)",
-    "f1":          "F1 Data  (ergast.com / api.openf1.org)",
 }
 
 
@@ -356,7 +351,37 @@ cat > /workspace/proxy/static/index.html <<'HTMLEOF'
     padding: 32px 24px;
   }
   h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
-  .subtitle { font-size: 0.8rem; color: var(--muted); margin-bottom: 28px; }
+  .subtitle { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
+  .coverage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 0.78rem;
+  }
+  .coverage-table th {
+    background: #13162080;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: center;
+    padding: 7px 6px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.03em;
+  }
+  .coverage-table th:first-child { text-align: left; padding-left: 10px; }
+  .coverage-table td {
+    padding: 6px 6px;
+    border: 1px solid var(--border);
+    text-align: center;
+    background: var(--surface);
+  }
+  .coverage-table td:first-child {
+    text-align: left;
+    padding-left: 10px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .coverage-table tr:hover td { background: #1f2335; }
+  .check { color: var(--green); font-size: 1rem; }
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -391,6 +416,48 @@ cat > /workspace/proxy/static/index.html <<'HTMLEOF'
 <body>
 <h1>Network Control Panel</h1>
 <p class="subtitle">Toggle external service access for the workshop demos</p>
+
+<table class="coverage-table">
+  <thead>
+    <tr>
+      <th>Toggle</th>
+      <th>Demo 1</th>
+      <th>Demo 2</th>
+      <th>Demo 3</th>
+      <th>Demo 4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OpenAI</td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+    <tr>
+      <td>Weather</td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+    <tr>
+      <td>Geolocation</td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+    <tr>
+      <td>IP Info</td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+      <td><span class="check">&#10003;</span></td>
+    </tr>
+  </tbody>
+</table>
 
 <div class="section-label">External Services</div>
 <div id="services"></div>
