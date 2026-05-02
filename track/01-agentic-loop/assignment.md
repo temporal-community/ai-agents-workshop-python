@@ -36,7 +36,8 @@ tabs:
   type: service
   hostname: workshop-host
   port: 8233
-- title: Network Control Panel
+- id: atuddsgj2iwy
+  title: Network Control Panel
   type: service
   hostname: workshop-host
   port: 5000

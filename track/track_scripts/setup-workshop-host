@@ -11,7 +11,9 @@ F1_MCP_HOME=/root/f1-mcp-server
 mkdir -p "${WORKSPACE}"
 
 # 1. System packages
-apt-get update -qq
+# apt-get update exits 100 on Ubuntu 22.04 due to a non-fatal command-not-found
+# post-invoke hook failure. The package lists download correctly so we ignore it.
+apt-get update -qq || true
 apt-get install -y --no-install-recommends \
     curl \
     wget \
@@ -67,8 +69,6 @@ pushd "${F1_MCP_HOME}"
 git checkout "${F1_MCP_COMMIT}"
 
 # Patch the hardcoded Mac cache path in f1_data.py.
-# The upstream repo has fastf1.Cache.enable_cache('~/Documents/Cline/...') which
-# does not exist on the VM. Replace with a path relative to the script file.
 sed -i "s|fastf1.Cache.enable_cache.*|import os\n_cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'cache')\nos.makedirs(_cache_dir, exist_ok=True)\nfastf1.Cache.enable_cache(_cache_dir)|" python/f1_data.py
 
 npm install
@@ -80,8 +80,7 @@ python3 -m venv .venv
 
 popd
 
-# 8. Pre-warm FastF1 cache into /root/f1-mcp-server/cache/ -- the same location
-#    the patched f1_data.py uses. This avoids cold-cache timeouts during demos.
+# 8. Pre-warm FastF1 cache
 mkdir -p "${F1_MCP_HOME}/cache"
 "${F1_MCP_HOME}/.venv/bin/python" - <<'EOF'
 import fastf1
@@ -98,7 +97,6 @@ except Exception as e:
 EOF
 
 # 9. mitmproxy + network control panel
-#    Install mitmproxy into its own venv to avoid system package conflicts.
 python3 -m venv /opt/mitmproxy-venv
 /opt/mitmproxy-venv/bin/pip install --upgrade pip
 /opt/mitmproxy-venv/bin/pip install mitmproxy flask
@@ -113,9 +111,22 @@ wait $MITM_PID 2>/dev/null || true
 
 MITM_CA_PEM="/root/.mitmproxy/mitmproxy-ca-cert.pem"
 
-# Trust the mitmproxy CA cert system-wide (covers Python httpx/requests/openai)
+# Trust the mitmproxy CA cert system-wide
 cp "$MITM_CA_PEM" /usr/local/share/ca-certificates/mitmproxy-ca.crt
 update-ca-certificates
+
+# Append the mitmproxy CA cert to the certifi bundle inside each demo venv.
+# httpx uses certifi's bundled CA store, not the system truststore, so we must
+# add the cert there directly.
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
+    CERTIFI_BUNDLE="${WORKSPACE}/workshop/${demo}/.venv/lib/python3.10/site-packages/certifi/cacert.pem"
+    if [[ -f "$CERTIFI_BUNDLE" ]]; then
+        cat "$MITM_CA_PEM" >> "$CERTIFI_BUNDLE"
+        echo "Appended mitmproxy CA to certifi bundle in ${demo}"
+    else
+        echo "WARNING: certifi bundle not found in ${demo} at ${CERTIFI_BUNDLE}"
+    fi
+done
 
 # Write the mitmproxy addon script
 mkdir -p /workspace/proxy
@@ -577,10 +588,6 @@ for i in $(seq 1 30); do
 done
 
 # 12. Shell environment via /etc/bash.bashrc
-#     Route all outbound HTTP/HTTPS through mitmproxy on port 8888.
-#     - httpx (OpenAI SDK, weather tools) respects HTTP_PROXY/HTTPS_PROXY natively
-#     - requests respects HTTP_PROXY/HTTPS_PROXY + REQUESTS_CA_BUNDLE
-#     - Node.js (F1 MCP server) needs NODE_EXTRA_CA_CERTS for the mitmproxy CA cert
 cat >> /etc/bash.bashrc <<'BASHRC'
 
 # Workshop environment
@@ -597,9 +604,10 @@ fi
 export HTTP_PROXY="http://127.0.0.1:8888"
 export HTTPS_PROXY="http://127.0.0.1:8888"
 export NO_PROXY="127.0.0.1,localhost"
-# Python requests library CA bundle
+# SSL_CERT_FILE covers httpx and other Python HTTP clients that don't use certifi
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-# Node.js does not use the system truststore -- point it at the mitmproxy cert
+# Node.js does not use the system truststore
 export NODE_EXTRA_CA_CERTS="/root/.mitmproxy/mitmproxy-ca-cert.pem"
 BASHRC
 
