@@ -131,17 +131,23 @@ From `demo6-heterogeneous-agent-orchestration/`:
 uv sync
 ```
 
-### 5. Start the worker
+### 5. Start the workers (two processes)
+
+The personal-assistant team and the F1 expert team run their own workers with their own plugin configurations. From `demo6-heterogeneous-agent-orchestration/`, in two separate terminals:
 
 ```bash
-uv run python -m worker
+# terminal A — PA + weather + travel-planner activity
+uv run python -m worker_pa
+
+# terminal B — F1 expert (separate process, separate plugin config)
+uv run python -m worker_f1
 ```
 
-Three Workers run concurrently in this one process, polling `weather-agent-tq`, `f1-expert-agent-tq`, and `orchestrator-tq`. The `ask_travel_planner` activity is registered on the orchestrator's worker (no separate task queue). Leave it running.
+`worker_pa.py` runs the orchestrator, the weather agent, and the `ask_travel_planner` activity on `orchestrator-tq` and `weather-agent-tq`. `worker_f1.py` runs the F1 expert workflow + Nexus handler on `f1-expert-agent-tq`. The two have different `OpenAIAgentsPlugin` configurations — see "Per-worker plugin configuration" below.
 
 ### 6. Start a workflow
 
-In a second terminal (also from `demo6-heterogeneous-agent-orchestration/`):
+In a third terminal (also from `demo6-heterogeneous-agent-orchestration/`):
 
 ```bash
 uv run python -m start_workflow "What's the weather at the next F1 race?"
@@ -187,10 +193,21 @@ In the OpenAI trace dashboard at [https://platform.openai.com/traces](https://pl
 - The **F1 expert** appears as a *separate* trace, not nested under `PersonalAssistant` (see "Known limitations" below).
 - The **travel planner**'s LLM calls go through Strands' own tracing pipeline, not the OpenAI Agents SDK's. They will not appear under `PersonalAssistant`. This is consistent with the fact that the Strands agent isn't aware of any Temporal/OpenAI-Agents trace context.
 
+## Per-worker plugin configuration
+
+`worker_pa.py` and `worker_f1.py` each construct their own `OpenAIAgentsPlugin` with deliberately different settings:
+
+| Worker | `add_temporal_spans` | `mcp_server_providers` | Why |
+|---|---|---|---|
+| `worker_pa.py` (PA + weather + travel planner activity) | `True` (default) | none | Trace context flows in cleanly via the starter's `with trace(...)` and onward through child workflows. The `temporal:executeWorkflow` / `temporal:startChildWorkflow` / `temporal:startActivity` custom spans render properly in the OpenAI trace dashboard. |
+| `worker_f1.py` (F1 expert) | **`False`** | F1 stateless MCP provider | The orchestrator's Nexus call doesn't propagate trace context to this worker (current contrib gap), so the workflow-inbound interceptor would otherwise create `temporal:*` custom spans against no active trace, leaking `parent_id="no-op"` into export batches and producing `[non-fatal] Tracing client error 400` log spam. Disabling `temporal:*` spans on this worker silences the leak. The F1 expert appears as its own top-level trace in the OpenAI dashboard instead of nesting under `PersonalAssistant`. |
+
+This per-worker tuning is a real benefit of running the F1 expert as a separate worker process: each team can choose plugin settings appropriate to its boundary.
+
 ## Known limitations
 
-- **Trace context across Nexus is not propagated** by the current `temporalio.contrib.openai_agents` interceptor (verified — `OpenAIAgentsContextPropagationInterceptor` has a `start_child_workflow` method but no Nexus equivalent). Effect: the F1 expert produces its own top-level trace in OpenAI's dashboard rather than nesting under the orchestrator's trace. Workflow history in Temporal still links them via the `NexusOperationScheduled` event, so it's just an OpenAI-trace-dashboard cosmetic gap. Captured as a planning open item.
+- **Trace context across Nexus is not propagated** by the current `temporalio.contrib.openai_agents` interceptor (verified — `OpenAIAgentsContextPropagationInterceptor` has a `start_child_workflow` method but no Nexus equivalent). Effect: the F1 expert produces its own top-level trace in OpenAI's dashboard rather than nesting under the orchestrator's trace. Workflow history in Temporal still links them via the `NexusOperationScheduled` event. Captured as Issue 1 (and the related Issue 2 on `nexus_operation_as_tool` schema) in `docs/research/openai-agents-plugin-starter-trace-requirement.md`.
 
 ## Production split
 
-In a real deployment you'd run the three Workers as three separate processes (often on three separate hosts, owned by three teams). The single-process layout here is a workshop convenience — change nothing about the workflow code, change `worker.py` from one process running three Workers to three processes each running one Worker. If you wanted the travel-planner activity isolated on its own infrastructure (so the heavy Strands deps don't share the orchestrator's environment), give it its own task queue and add a fourth Worker that registers just that activity.
+The two-process layout here matches what a real deployment would look like — different teams running their own workers on their own hosts, each configuring their plugin independently. If you wanted the travel-planner activity isolated on its own infrastructure (so the heavy Strands deps don't share the PA team's environment), give it its own task queue and add a third Worker that registers just that activity.

@@ -1,6 +1,7 @@
-# ABOUTME: Single-process worker that runs three Temporal Workers (one per task queue).
-# Weather + F1-expert + orchestrator agents all live in this process; each polls its own queue.
-# The travel-planner activity runs on the orchestrator's worker (no separate queue/workflow).
+# ABOUTME: F1 expert team's worker — F1ExpertAgentWorkflow + Nexus handler.
+# Plugin: add_temporal_spans=False because the orchestrator's Nexus call doesn't propagate
+# trace context (current contrib gap). Skipping temporal:* spans here avoids creating spans
+# with parent_id="no-op" that the OpenAI tracing backend rejects (HTTP 400, dropped batches).
 
 import asyncio
 import os
@@ -17,22 +18,9 @@ from temporalio.envconfig import ClientConfig
 from temporalio.worker import Worker
 
 from f1_expert_agent import F1ExpertAgentWorkflow, F1ExpertServiceHandler
-from personal_assistant import PersonalAssistantWorkflow
-from tool_activities import (
-    get_coordinates,
-    get_ip_address,
-    get_location_info,
-    get_weather,
-)
-from travel_planner_activity import ask_travel_planner
-from weather_agent import WeatherAgentWorkflow
 
-WEATHER_TASK_QUEUE = "weather-agent-tq"
 F1_EXPERT_TASK_QUEUE = "f1-expert-agent-tq"
-ORCHESTRATOR_TASK_QUEUE = "orchestrator-tq"
-
 MCP_SERVER_NAME = "f1-data"
-NEXUS_ENDPOINT_NAME = "f1-expert"
 
 F1_MCP_SERVER_HOME = os.environ.get(
     "F1_MCP_SERVER_HOME",
@@ -66,23 +54,17 @@ async def main() -> None:
                 server_factory=_f1_server_factory,
             ),
         ],
+        # Trace context doesn't propagate through Nexus to this worker, so the
+        # workflow-inbound interceptor would create temporal:* spans with no
+        # active trace, leaking parent_id="no-op" into export batches. Disable.
+        # The F1 expert will appear as its own top-level trace in the OpenAI
+        # dashboard until the contrib gains Nexus trace propagation.
+        add_temporal_spans=False,
     )
 
     config = ClientConfig.load_client_connect_config()
     config.setdefault("target_host", "localhost:7233")
     client = await Client.connect(**config, plugins=[plugin])
-
-    weather_worker = Worker(
-        client,
-        task_queue=WEATHER_TASK_QUEUE,
-        workflows=[WeatherAgentWorkflow],
-        activities=[
-            get_ip_address,
-            get_location_info,
-            get_coordinates,
-            get_weather,
-        ],
-    )
 
     f1_expert_worker = Worker(
         client,
@@ -91,25 +73,13 @@ async def main() -> None:
         nexus_service_handlers=[F1ExpertServiceHandler()],
     )
 
-    orchestrator_worker = Worker(
-        client,
-        task_queue=ORCHESTRATOR_TASK_QUEUE,
-        workflows=[PersonalAssistantWorkflow],
-        activities=[ask_travel_planner],
-    )
-
     print(
-        f"Workers running:\n"
-        f"  - {WEATHER_TASK_QUEUE} (WeatherAgentWorkflow)\n"
+        f"F1 worker running:\n"
         f"  - {F1_EXPERT_TASK_QUEUE} (F1ExpertAgentWorkflow + Nexus handler)\n"
-        f"  - {ORCHESTRATOR_TASK_QUEUE} (PersonalAssistantWorkflow + ask_travel_planner activity [Strands])"
+        f"  - plugin: add_temporal_spans=False (Nexus trace gap workaround)"
     )
 
-    await asyncio.gather(
-        weather_worker.run(),
-        f1_expert_worker.run(),
-        orchestrator_worker.run(),
-    )
+    await f1_expert_worker.run()
 
 
 if __name__ == "__main__":
