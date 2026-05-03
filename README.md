@@ -13,6 +13,7 @@ Every demo is self-contained: its own `pyproject.toml`, its own task queue, its 
 | [`demo3-mcp`](demo3-mcp/) | Adds an MCP (Model Context Protocol) tool server for Formula 1 race data. MCP operations are dispatched as Temporal activities via `StatelessMCPServerProvider`. The agent now chains F1 tools with weather tools. | [`demo3-mcp/README.md`](demo3-mcp/README.md) |
 | [`demo4-hitl`](demo4-hitl/) | Human-in-the-loop. The agent can pause mid-execution to ask the user a question via an in-workflow `ask_user` tool, a Temporal signal for the response, and queries for the starter to poll. | [`demo4-hitl/README.md`](demo4-hitl/README.md) |
 | [`demo5-multi-agent`](demo5-multi-agent/) | Multi-agent orchestration. A personal-assistant agent delegates to two specialist sub-agents (weather, F1 expert), invoking one via Temporal child workflow and the other via Nexus. | [`demo5-multi-agent/README.md`](demo5-multi-agent/README.md) |
+| [`demo6-heterogeneous-agent-orchestration`](demo6-heterogeneous-agent-orchestration/) | Adds a third specialist (travel planner) built with the Strands Agents SDK alongside demo5's OpenAI Agents SDK specialists. Two frameworks behind one orchestrator — and a deliberate contrast between per-step durability (with Temporal's framework contrib) and coarse-grained, single-activity durability (without). | [`demo6-heterogeneous-agent-orchestration/README.md`](demo6-heterogeneous-agent-orchestration/README.md) |
 
 ## How to work through the workshop
 
@@ -36,9 +37,9 @@ Every demo uses a distinct Temporal task queue, so workers can run side-by-side 
 
 ## Observing what Temporal gives you
 
-All four demos are Temporal workflows, so you can watch them in the Temporal Web UI at http://localhost:8233. The comparisons between demos are most interesting in that UI — demo2's tool calls appear as activities automatically, demo3 adds MCP listTools/callTool activities, demo4 shows a workflow that suspends durably on `wait_condition` and later receives a signal.
+All demos are Temporal workflows, so you can watch them in the Temporal Web UI at http://localhost:8233. The comparisons between demos are most interesting in that UI — demo2's tool calls appear as activities automatically, demo3 adds MCP listTools/callTool activities, demo4 shows a workflow that suspends durably on `wait_condition` and later receives a signal, and demo6 puts per-step (OpenAI Agents) and single-activity (Strands) durability side by side.
 
-Demos 2–4 also send traces to OpenAI's trace dashboard at https://platform.openai.com/traces, so you can see the agent's reasoning alongside the Temporal-side history.
+Demos 2–6 also send traces to OpenAI's trace dashboard at https://platform.openai.com/traces, so you can see the agent's reasoning alongside the Temporal-side history.
 
 ## Project layout
 
@@ -52,7 +53,8 @@ temporal-ai-agents/
 ├── demo2-openai-temporal-integration/
 ├── demo3-mcp/
 ├── demo4-hitl/
-└── demo5-multi-agent/
+├── demo5-multi-agent/
+└── demo6-heterogeneous-agent-orchestration/
 ```
 
 ## Related
