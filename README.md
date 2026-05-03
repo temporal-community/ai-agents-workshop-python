@@ -12,7 +12,7 @@ Every demo is self-contained: its own `pyproject.toml`, its own task queue, its 
 | [`demo2-openai-temporal-integration`](demo2-openai-temporal-integration/) | Same agent, reimplemented with the OpenAI Agents SDK and Temporal's `temporalio.contrib.openai_agents` plugin. The SDK's `Runner` drives the loop; Temporal makes every LLM call and tool call an activity automatically. Workflow becomes one-line. | [`demo2-openai-temporal-integration/README.md`](demo2-openai-temporal-integration/README.md) |
 | [`demo3-mcp`](demo3-mcp/) | Adds an MCP (Model Context Protocol) tool server for Formula 1 race data. MCP operations are dispatched as Temporal activities via `StatelessMCPServerProvider`. The agent now chains F1 tools with weather tools. | [`demo3-mcp/README.md`](demo3-mcp/README.md) |
 | [`demo4-hitl`](demo4-hitl/) | Human-in-the-loop. The agent can pause mid-execution to ask the user a question via an in-workflow `ask_user` tool, a Temporal signal for the response, and queries for the starter to poll. | [`demo4-hitl/README.md`](demo4-hitl/README.md) |
-| `demo5-multi-agent` | *Not yet built.* | — |
+| [`demo5-multi-agent`](demo5-multi-agent/) | Multi-agent orchestration. A personal-assistant agent delegates to two specialist sub-agents (weather, F1 expert), invoking one via Temporal child workflow and the other via Nexus. | [`demo5-multi-agent/README.md`](demo5-multi-agent/README.md) |
 
 ## How to work through the workshop
 
@@ -52,7 +52,7 @@ temporal-ai-agents/
 ├── demo2-openai-temporal-integration/
 ├── demo3-mcp/
 ├── demo4-hitl/
-└── demo5-multi-agent/                         # empty — not yet built
+└── demo5-multi-agent/
 ```
 
 ## Related
