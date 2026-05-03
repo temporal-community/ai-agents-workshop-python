@@ -56,10 +56,20 @@ class PersonalAssistantWorkflow:
         )
 
         f1_tool = nexus_operation_as_tool(
-            F1ExpertService.ask,
+            F1ExpertService.ask_f1_expert,
             service=F1ExpertService,
             endpoint="f1-expert",
             schedule_to_close_timeout=timedelta(minutes=5),
+        )
+        # The contrib helper has no description hook (the Operation dataclass
+        # doesn't carry one and the stub function it inspects has no __doc__).
+        # Set the description directly on the FunctionTool so the LLM has a
+        # real signal for when to choose this tool. See
+        # docs/research/openai-agents-plugin-starter-trace-requirement.md (Issue 2).
+        f1_tool.description = (
+            "Delegate Formula 1 questions to the F1 expert specialist. "
+            "It can look up race schedules, results, driver and constructor "
+            "standings, and circuit telemetry. Pass the full question as plain English."
         )
 
         agent = Agent(

@@ -25,7 +25,11 @@ class AskResponse(BaseModel):
 
 @nexusrpc.service
 class F1ExpertService:
-    ask: nexusrpc.Operation[AskRequest, AskResponse]
+    # Operation attribute name doubles as the operation name. Naming this
+    # ask_f1_expert (rather than bare "ask") makes the LLM-facing tool name
+    # meaningful — the contrib helper derives the tool name from the operation
+    # name verbatim.
+    ask_f1_expert: nexusrpc.Operation[AskRequest, AskResponse]
 
 
 with workflow.unsafe.imports_passed_through():
@@ -63,7 +67,7 @@ class F1ExpertAgentWorkflow:
 @service_handler(service=F1ExpertService)
 class F1ExpertServiceHandler:
     @nexus.workflow_run_operation
-    async def ask(
+    async def ask_f1_expert(
         self,
         ctx: nexus.WorkflowRunOperationContext,
         request: AskRequest,
