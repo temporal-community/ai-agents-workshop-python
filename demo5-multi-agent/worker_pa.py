@@ -1,9 +1,12 @@
-# ABOUTME: Personal-assistant team's worker — PersonalAssistantWorkflow + WeatherAgentWorkflow.
-# Plugin: add_temporal_spans=True (default) so trace context propagates from starter into the
-# orchestrator and on into the weather child workflow with full Temporal-layer visualization.
+# ABOUTME: Personal-assistant team's worker -- PersonalAssistantWorkflow + WeatherAgentWorkflow.
 
 import asyncio
+import os
 from datetime import timedelta
+
+# Disable OpenAI Agents SDK trace export. No trace server is configured in
+# the workshop environment and the warnings are confusing for participants.
+os.environ["OPENAI_AGENTS_DISABLE_TRACING"] = "1"
 
 from temporalio.client import Client
 from temporalio.contrib.openai_agents import (
@@ -31,9 +34,6 @@ async def main() -> None:
         model_params=ModelActivityParameters(
             start_to_close_timeout=timedelta(seconds=60),
         ),
-        # No mcp_server_providers — the F1 MCP server is owned by the F1 worker.
-        # add_temporal_spans defaults to True; trace context flows in cleanly via
-        # the starter's `with trace(...)` so the temporal:* spans render properly.
     )
 
     config = ClientConfig.load_client_connect_config()
@@ -59,9 +59,10 @@ async def main() -> None:
     )
 
     print(
-        f"PA worker running:\n"
+        f"PA worker started.\n"
         f"  - {WEATHER_TASK_QUEUE} (WeatherAgentWorkflow)\n"
-        f"  - {ORCHESTRATOR_TASK_QUEUE} (PersonalAssistantWorkflow)"
+        f"  - {ORCHESTRATOR_TASK_QUEUE} (PersonalAssistantWorkflow)\n"
+        f"Ready -- start the F1 worker in the other terminal, then run the starter."
     )
 
     await asyncio.gather(

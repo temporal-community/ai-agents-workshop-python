@@ -52,8 +52,8 @@ git clone \
     https://github.com/temporal-community/ai-agents-workshop-python.git \
     "${WORKSPACE}/workshop"
 
-# 6. Install Python dependencies for all four demos
-for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
+# 6. Install Python dependencies for all demos
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent; do
     pushd "${WORKSPACE}/workshop/${demo}"
     uv sync
     popd
@@ -118,7 +118,7 @@ update-ca-certificates
 # Append the mitmproxy CA cert to the certifi bundle inside each demo venv.
 # httpx uses certifi's bundled CA store, not the system truststore, so we must
 # add the cert there directly.
-for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl; do
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent; do
     CERTIFI_BUNDLE="${WORKSPACE}/workshop/${demo}/.venv/lib/python3.10/site-packages/certifi/cacert.pem"
     if [[ -f "$CERTIFI_BUNDLE" ]]; then
         cat "$MITM_CA_PEM" >> "$CERTIFI_BUNDLE"
@@ -387,7 +387,6 @@ cat > /workspace/proxy/static/index.html <<'HTMLEOF'
 <h1>Network Control Panel</h1>
 <p class="subtitle">Toggle external service access for the workshop demos</p>
 
-
 <div class="section-label">External Services</div>
 <div id="services"></div>
 
@@ -582,6 +581,17 @@ for i in $(seq 1 30); do
     fi
     sleep 3
 done
+
+# Register the Nexus endpoint for demo5 (and demo6 when added).
+# The endpoint name must match the `endpoint=` argument in personal_assistant.py.
+# Re-running after the endpoint already exists fails harmlessly.
+temporal operator nexus endpoint create \
+    --name f1-expert \
+    --target-namespace default \
+    --target-task-queue f1-expert-agent-tq \
+    --address 127.0.0.1:7233 || true
+
+echo "Nexus endpoint f1-expert registered (or already exists)"
 
 # 12. Shell environment via /etc/bash.bashrc
 cat >> /etc/bash.bashrc <<'BASHRC'

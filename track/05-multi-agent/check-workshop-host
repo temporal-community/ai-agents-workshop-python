@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPLETED=$(temporal workflow list \
+    --address 127.0.0.1:7233 \
+    --namespace default \
+    --query 'TaskQueue="orchestrator-tq" AND ExecutionStatus="Completed"' \
+    --limit 1 \
+    2>/dev/null | grep -c "Completed" || true)
+
+if [[ "${COMPLETED}" -lt 1 ]]; then
+    echo "FAIL: No completed workflows found on orchestrator-tq yet. Run a workflow and wait for it to finish."
+    exit 1
+fi
+
+echo "OK: At least one demo5 orchestrator workflow completed."
+exit 0
