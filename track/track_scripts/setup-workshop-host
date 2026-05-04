@@ -11,9 +11,19 @@ F1_MCP_HOME=/root/f1-mcp-server
 mkdir -p "${WORKSPACE}"
 
 # 1. System packages
-# apt-get update exits 100 on Ubuntu 22.04 due to a non-fatal command-not-found
-# post-invoke hook failure. The package lists download correctly so we ignore it.
-apt-get update -qq || true
+# Ubuntu 22.04 cloud images sometimes have incomplete or inconsistent package
+# lists on first boot due to background unattended-upgrades processes.
+# Retry apt-get update up to 3 times before proceeding.
+# Do NOT install python3-venv/python3-dev/python3-pip here -- the VM image
+# ships a python3 version that conflicts with the repo versions of those
+# packages. uv manages its own Python environments; python3 -m venv works
+# directly using the system python3 without needing the separate venv package.
+for attempt in 1 2 3; do
+    apt-get update && break
+    echo "apt-get update attempt ${attempt} failed, retrying in 15s..."
+    sleep 15
+done
+
 apt-get install -y --no-install-recommends \
     curl \
     wget \
@@ -22,10 +32,7 @@ apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     gnupg \
-    bash-completion \
-    python3-venv \
-    python3-dev \
-    python3-pip
+    bash-completion
 
 # Make python resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
@@ -53,7 +60,7 @@ git clone \
     "${WORKSPACE}/workshop"
 
 # 6. Install Python dependencies for all demos
-for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent; do
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent demo6-heterogeneous-agent-orchestration; do
     pushd "${WORKSPACE}/workshop/${demo}"
     uv sync
     popd
@@ -118,7 +125,7 @@ update-ca-certificates
 # Append the mitmproxy CA cert to the certifi bundle inside each demo venv.
 # httpx uses certifi's bundled CA store, not the system truststore, so we must
 # add the cert there directly.
-for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent; do
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent demo6-heterogeneous-agent-orchestration; do
     CERTIFI_BUNDLE="${WORKSPACE}/workshop/${demo}/.venv/lib/python3.10/site-packages/certifi/cacert.pem"
     if [[ -f "$CERTIFI_BUNDLE" ]]; then
         cat "$MITM_CA_PEM" >> "$CERTIFI_BUNDLE"
@@ -582,16 +589,22 @@ for i in $(seq 1 30); do
     sleep 3
 done
 
-# Register the Nexus endpoint for demo5 (and demo6 when added).
-# The endpoint name must match the `endpoint=` argument in personal_assistant.py.
-# Re-running after the endpoint already exists fails harmlessly.
+# Register Nexus endpoints. Re-running after an endpoint already exists fails harmlessly.
+# demo5: f1-expert
 temporal operator nexus endpoint create \
     --name f1-expert \
     --target-namespace default \
     --target-task-queue f1-expert-agent-tq \
     --address 127.0.0.1:7233 || true
-
 echo "Nexus endpoint f1-expert registered (or already exists)"
+
+# demo6: f1-expert-d6
+temporal operator nexus endpoint create \
+    --name f1-expert-d6 \
+    --target-namespace default \
+    --target-task-queue f1-expert-agent-tq \
+    --address 127.0.0.1:7233 || true
+echo "Nexus endpoint f1-expert-d6 registered (or already exists)"
 
 # 12. Shell environment via /etc/bash.bashrc
 cat >> /etc/bash.bashrc <<'BASHRC'
@@ -610,10 +623,8 @@ fi
 export HTTP_PROXY="http://127.0.0.1:8888"
 export HTTPS_PROXY="http://127.0.0.1:8888"
 export NO_PROXY="127.0.0.1,localhost"
-# SSL_CERT_FILE covers httpx and other Python HTTP clients that don't use certifi
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-# Node.js does not use the system truststore
 export NODE_EXTRA_CA_CERTS="/root/.mitmproxy/mitmproxy-ca-cert.pem"
 BASHRC
 
