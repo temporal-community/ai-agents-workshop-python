@@ -1,6 +1,6 @@
 slug: temporal-python-ai-agents
 id: f6rjowkvvbfm
-title: Building Durable AI Agents with Python and Temporal - DRAFT
+title: Building Durable AI Agents with Python and Temporal - DEMO5
 description: |
   A progressive four-demo workshop that shows how to build production-grade AI
   agents using the OpenAI Agents SDK and Temporal for durable execution. Starting
@@ -27,5 +27,5 @@ lab_config:
   hideStopButton: false
   default_layout: AssignmentLeft
   default_layout_sidebar_size: 40
-checksum: "12048554092557268762"
+checksum: "11810264549662300748"
 enhanced_loading: false
