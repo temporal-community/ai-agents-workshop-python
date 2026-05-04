@@ -1,11 +1,12 @@
-# ABOUTME: F1 expert team's worker — F1ExpertAgentWorkflow + Nexus handler.
-# Plugin: add_temporal_spans=False because the orchestrator's Nexus call doesn't propagate
-# trace context (current contrib gap). Skipping temporal:* spans here avoids creating spans
-# with parent_id="no-op" that the OpenAI tracing backend rejects (HTTP 400, dropped batches).
+# ABOUTME: F1 expert team's worker -- F1ExpertAgentWorkflow + Nexus handler.
 
 import asyncio
 import os
 from datetime import timedelta
+
+# Disable OpenAI Agents SDK trace export. No trace server is configured in
+# the workshop environment and the warnings are confusing for participants.
+os.environ["OPENAI_AGENTS_DISABLE_TRACING"] = "1"
 
 from agents.mcp import MCPServerStdio
 from temporalio.client import Client
@@ -24,7 +25,7 @@ MCP_SERVER_NAME = "f1-data"
 
 F1_MCP_SERVER_HOME = os.environ.get(
     "F1_MCP_SERVER_HOME",
-    os.path.expanduser("~/Projects/Temporal/AI/MCP/f1-mcp-server"),
+    "/root/f1-mcp-server",
 )
 
 
@@ -40,6 +41,7 @@ def _f1_server_factory() -> MCPServerStdio:
             "args": ["-c", launch],
         },
         cache_tools_list=True,
+        client_session_timeout_seconds=120,
     )
 
 
@@ -54,12 +56,6 @@ async def main() -> None:
                 server_factory=_f1_server_factory,
             ),
         ],
-        # Trace context doesn't propagate through Nexus to this worker, so the
-        # workflow-inbound interceptor would create temporal:* spans with no
-        # active trace, leaking parent_id="no-op" into export batches. Disable.
-        # The F1 expert will appear as its own top-level trace in the OpenAI
-        # dashboard until the contrib gains Nexus trace propagation.
-        add_temporal_spans=False,
     )
 
     config = ClientConfig.load_client_connect_config()
@@ -74,9 +70,9 @@ async def main() -> None:
     )
 
     print(
-        f"F1 worker running:\n"
+        f"F1 worker started.\n"
         f"  - {F1_EXPERT_TASK_QUEUE} (F1ExpertAgentWorkflow + Nexus handler)\n"
-        f"  - plugin: add_temporal_spans=False (Nexus trace gap workaround)"
+        f"  F1 MCP server: {F1_MCP_SERVER_HOME}"
     )
 
     await f1_expert_worker.run()

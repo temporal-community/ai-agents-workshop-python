@@ -11,14 +11,9 @@ F1_MCP_HOME=/root/f1-mcp-server
 mkdir -p "${WORKSPACE}"
 
 # 1. System packages
-# Ubuntu 22.04 cloud images sometimes have incomplete package lists on first
-# boot. Retry the update+install sequence up to 3 times with a delay.
-for attempt in 1 2 3; do
-    apt-get update && break
-    echo "apt-get update attempt ${attempt} failed, retrying in 15s..."
-    sleep 15
-done
-
+# apt-get update exits 100 on Ubuntu 22.04 due to a non-fatal command-not-found
+# post-invoke hook failure. The package lists download correctly so we ignore it.
+apt-get update -qq || true
 apt-get install -y --no-install-recommends \
     curl \
     wget \
