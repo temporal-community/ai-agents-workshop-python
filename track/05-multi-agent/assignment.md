@@ -1,5 +1,6 @@
 ---
 slug: multi-agent
+id: xcecicb6wthw
 type: challenge
 title: 'Demo 5: Multi-Agent Orchestration'
 teaser: Three agents, three workflows. A personal assistant delegates to specialists
@@ -26,27 +27,33 @@ notes:
     three separate task queues - you can see all three workflow executions
     independently in the Temporal UI.
 tabs:
-- title: Worker PA
+- id: uiv2s44gv4qr
+  title: Worker PA
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo5-multi-agent
-- title: Worker F1
+- id: xzsrty2svsny
+  title: Worker F1
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo5-multi-agent
-- title: Starter
+- id: q7xfa7anuklv
+  title: Starter
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo5-multi-agent
-- title: Temporal UI
+- id: ywyr433caxyb
+  title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- title: Network Control Panel
+- id: ibtbtwufve7r
+  title: Network Control Panel
   type: service
   hostname: workshop-host
   port: 5000
-- title: Editor
+- id: etyyohta43gd
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
