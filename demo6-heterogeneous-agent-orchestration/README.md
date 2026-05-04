@@ -96,7 +96,7 @@ Would be added as a `@activity.defn` activity wired via `activity_as_tool(...)` 
 - **uv** — `brew install uv` on macOS
 - **Temporal CLI** — `brew install temporal` on macOS
 - **OpenAI API key** — `export OPENAI_API_KEY=sk-...`
-- **F1 MCP server** — at `~/Projects/Temporal/AI/MCP/f1-mcp-server/` (override with `F1_MCP_SERVER_HOME`). Same server demo3 and demo4 use.
+- **F1 MCP server** — installed locally and reachable via `F1_MCP_SERVER_HOME`. See [demo 3's install instructions](../demo3-mcp/README.md#install-the-f1-mcp-server) for the one-time setup; the same install is reused here.
 
 ## Running
 

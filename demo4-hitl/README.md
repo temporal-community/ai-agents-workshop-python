@@ -50,7 +50,7 @@ Same tools as demo3 (4 weather activities + 8 F1 MCP tools), **plus** one new in
 - **uv** — `brew install uv` (macOS) or see [uv docs](https://docs.astral.sh/uv/)
 - **Temporal CLI** — `brew install temporal` (macOS) or see [Temporal CLI docs](https://docs.temporal.io/cli)
 - **OpenAI API key** — set as `OPENAI_API_KEY` environment variable
-- **F1 MCP server** — expected at `~/Projects/Temporal/AI/MCP/f1-mcp-server/`. Override with `F1_MCP_SERVER_HOME`.
+- **F1 MCP server** — installed locally and reachable via `F1_MCP_SERVER_HOME`. See [demo 3's install instructions](../demo3-mcp/README.md#install-the-f1-mcp-server) for the one-time setup; the same install is reused here.
 
 ## Running
 

@@ -10,9 +10,11 @@ Demo3 adds an external MCP server — `f1-mcp-server`, a Node.js + Python hybrid
 
 ## Architecture
 
+The F1 MCP server is **a local subprocess**, not a remote service. The worker spawns it on demand and communicates with it over **stdio** (line-delimited JSON-RPC on the child process's stdin/stdout). No HTTP, no port, no separate "server" to keep running. When a workflow tick needs to invoke an F1 tool, the contrib's stateless provider connects, calls, and cleans up — the subprocess lives only for the duration of one MCP operation.
+
 - **`StatelessMCPServerProvider`** (from `temporalio.contrib.openai_agents`) — registered on the worker under the name `"f1-data"`. Each `list_tools()` / `call_tool()` becomes a Temporal activity that connects, calls, and cleans up. No persistent connection between workflow ticks.
 - **`stateless_mcp_server("f1-data")`** (workflow-side) — returns a handle that the agent passes to `Agent(mcp_servers=[...])`. Calls go through the activities the provider registered.
-- **`MCPServerStdio`** — the Agents SDK's stdio transport. Configured here to launch `bash -c "source .../.venv/bin/activate && node .../build/index.js"` so the F1 server's Node entrypoint can shell out to Python (FastF1).
+- **`MCPServerStdio`** — the Agents SDK's stdio transport. Configured here to launch `bash -c "source $F1_MCP_SERVER_HOME/.venv/bin/activate && node $F1_MCP_SERVER_HOME/build/index.js"` so the F1 server's Node entrypoint can shell out to Python (FastF1).
 - **`OpenAIAgentsPlugin(mcp_server_providers=[...])`** — wires the provider's activities into the worker automatically. No manual activity registration for MCP.
 
 ### Trade-off: tool coupling
@@ -47,12 +49,53 @@ Same as demo2 — activity-backed tools and MCP-backed tools are both coupled to
 
 - **Python 3.10+**
 - **uv** — `brew install uv` (macOS) or see [uv docs](https://docs.astral.sh/uv/)
+- **Node.js 18+** — needed to run the F1 MCP server's TypeScript entrypoint
 - **Temporal CLI** — `brew install temporal` (macOS) or see [Temporal CLI docs](https://docs.temporal.io/cli)
 - **OpenAI API key** — set as `OPENAI_API_KEY` environment variable
-- **F1 MCP server** — expected at `~/Projects/Temporal/AI/MCP/f1-mcp-server/`. It's a Node.js + Python project with a prebuilt `build/index.js` and a provisioned `.venv/` containing `fastf1`, `pandas`, and `numpy`. If you keep it elsewhere, point the worker at it via:
-  ```bash
-  export F1_MCP_SERVER_HOME=/absolute/path/to/f1-mcp-server
-  ```
+- **F1 MCP server** — installed locally, see [Install the F1 MCP server](#install-the-f1-mcp-server) below
+
+## Install the F1 MCP server
+
+This is a one-time setup. The worker will launch the server as a local subprocess each time it needs to call an F1 tool, but the server itself is a Node.js + Python hybrid that you have to clone, build, and provision a Python venv for ahead of time.
+
+### 1. Clone the repository
+
+Pick a directory you'd like to keep the server in. Anywhere is fine; the worker locates it via the `F1_MCP_SERVER_HOME` environment variable below.
+
+```bash
+git clone https://github.com/rakeshgangwar/f1-mcp-server.git
+cd f1-mcp-server
+```
+
+### 2. Build the Node.js side
+
+```bash
+npm install
+npm run build
+```
+
+This produces the `build/index.js` entrypoint that the worker spawns.
+
+### 3. Provision the Python side
+
+The Node.js entrypoint shells out to `python3` (within the activated venv) to run [FastF1](https://github.com/theOehrly/Fast-F1) for the actual data lookups. Create a venv inside the project and install the Python deps:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install fastf1 pandas numpy
+deactivate
+```
+
+The worker will activate this venv on each invocation via the launch command shown in the Architecture section above.
+
+### 4. Point the workshop worker at the install location
+
+```bash
+export F1_MCP_SERVER_HOME=/absolute/path/to/f1-mcp-server
+```
+
+Add this to your shell profile if you want it persisted across sessions. The workshop worker reads this variable at startup and bakes it into the `MCPServerStdio` launch command.
 
 ## Running
 
