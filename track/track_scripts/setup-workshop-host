@@ -11,12 +11,19 @@ F1_MCP_HOME=/root/f1-mcp-server
 mkdir -p "${WORKSPACE}"
 
 # 1. System packages
-# Ubuntu 22.04 cloud images sometimes have incomplete or inconsistent package
-# lists on first boot due to background unattended-upgrades processes.
-# Retry apt-get update up to 3 times before proceeding.
+# Instruqt VMs run on GCP. Add the GCP regional mirror explicitly so apt
+# doesn't depend solely on archive.ubuntu.com which is frequently slow or
+# unreachable from GCP. The regional mirror is always reachable and fast.
 # Use python3.10-venv (version-specific) not python3-venv (generic) -- the
 # generic package has a dependency conflict on Instruqt VMs where the image
 # ships python3 3.10.6-1~22.04.1 but the repo expects exactly 3.10.6-1~22.04.
+cat > /etc/apt/sources.list <<'SOURCES'
+deb http://us-central1.gce.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse
+deb http://us-central1.gce.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse
+deb http://us-central1.gce.archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse
+SOURCES
+
 for attempt in 1 2 3; do
     apt-get update && break
     echo "apt-get update attempt ${attempt} failed, retrying in 15s..."
