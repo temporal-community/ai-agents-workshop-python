@@ -14,10 +14,9 @@ mkdir -p "${WORKSPACE}"
 # Ubuntu 22.04 cloud images sometimes have incomplete or inconsistent package
 # lists on first boot due to background unattended-upgrades processes.
 # Retry apt-get update up to 3 times before proceeding.
-# Do NOT install python3-venv/python3-dev/python3-pip here -- the VM image
-# ships a python3 version that conflicts with the repo versions of those
-# packages. uv manages its own Python environments; python3 -m venv works
-# directly using the system python3 without needing the separate venv package.
+# Use python3.10-venv (version-specific) not python3-venv (generic) -- the
+# generic package has a dependency conflict on Instruqt VMs where the image
+# ships python3 3.10.6-1~22.04.1 but the repo expects exactly 3.10.6-1~22.04.
 for attempt in 1 2 3; do
     apt-get update && break
     echo "apt-get update attempt ${attempt} failed, retrying in 15s..."
@@ -32,7 +31,8 @@ apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     gnupg \
-    bash-completion
+    bash-completion \
+    python3.10-venv
 
 # Make python resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
@@ -123,8 +123,7 @@ cp "$MITM_CA_PEM" /usr/local/share/ca-certificates/mitmproxy-ca.crt
 update-ca-certificates
 
 # Append the mitmproxy CA cert to the certifi bundle inside each demo venv.
-# httpx uses certifi's bundled CA store, not the system truststore, so we must
-# add the cert there directly.
+# httpx uses certifi's bundled CA store, not the system truststore.
 for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent demo6-heterogeneous-agent-orchestration; do
     CERTIFI_BUNDLE="${WORKSPACE}/workshop/${demo}/.venv/lib/python3.10/site-packages/certifi/cacert.pem"
     if [[ -f "$CERTIFI_BUNDLE" ]]; then
