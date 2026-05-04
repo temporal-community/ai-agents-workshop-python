@@ -1,5 +1,6 @@
 ---
 slug: heterogeneous-agents
+id: 5ypjll3mxc0b
 type: challenge
 title: 'Demo 6: Heterogeneous Agent Orchestration'
 teaser: Two frameworks, one orchestrator. A Strands agent joins the OpenAI agents
@@ -32,27 +33,33 @@ notes:
     and F1 paths show detailed per-step activities; the travel planner path
     shows a single opaque `ask_travel_planner` activity event.
 tabs:
-- title: Worker PA
+- id: ax9nldup6nmj
+  title: Worker PA
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
-- title: Worker F1
+- id: srjgxyxxytgp
+  title: Worker F1
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
-- title: Starter
+- id: xbfchwwu16fp
+  title: Starter
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
-- title: Temporal UI
+- id: pfxv89cjkmvl
+  title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- title: Network Control Panel
+- id: 62y6od0vrop1
+  title: Network Control Panel
   type: service
   hostname: workshop-host
   port: 5000
-- title: Editor
+- id: rpor6tvajxnn
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
