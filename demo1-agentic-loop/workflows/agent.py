@@ -23,7 +23,7 @@ class AgentWorkflow:
             llm_result = await workflow.execute_activity(
                 openai_responses.create,
                 openai_responses.OpenAIResponsesRequest(
-                    model="gpt-4o",
+                    model="gpt-3.5-turbo",
                     instructions=tool_helpers.HELPFUL_AGENT_SYSTEM_INSTRUCTIONS,
                     input=input_list,
                     tools=get_tools(),
