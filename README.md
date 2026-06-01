@@ -13,7 +13,8 @@ Every demo is self-contained: its own `pyproject.toml`, its own task queue, its 
 | [`demo3-mcp`](demo3-mcp/) | Adds an MCP (Model Context Protocol) tool server for Formula 1 race data. MCP operations are dispatched as Temporal activities via `StatelessMCPServerProvider`. The agent now chains F1 tools with weather tools. | [`demo3-mcp/README.md`](demo3-mcp/README.md) |
 | [`demo4-hitl`](demo4-hitl/) | Human-in-the-loop. The agent can pause mid-execution to ask the user a question via an in-workflow `ask_user` tool, a Temporal signal for the response, and queries for the starter to poll. | [`demo4-hitl/README.md`](demo4-hitl/README.md) |
 | [`demo5-multi-agent`](demo5-multi-agent/) | Multi-agent orchestration. A personal-assistant agent delegates to two specialist sub-agents (weather, F1 expert), invoking one via Temporal child workflow and the other via Nexus. | [`demo5-multi-agent/README.md`](demo5-multi-agent/README.md) |
-| [`demo6-heterogeneous-agent-orchestration`](demo6-heterogeneous-agent-orchestration/) | Adds a third specialist (travel planner) built with the Strands Agents SDK alongside demo5's OpenAI Agents SDK specialists. Two frameworks behind one orchestrator — and a deliberate contrast between per-step durability (with Temporal's framework contrib) and coarse-grained, single-activity durability (without). | [`demo6-heterogeneous-agent-orchestration/README.md`](demo6-heterogeneous-agent-orchestration/README.md) |
+| [`demo6a-different-sdks`](demo6a-different-sdks/) | Heterogeneity axis 1 — **different frameworks**. Adds a third specialist (travel planner) built with the Strands Agents SDK alongside demo5's OpenAI Agents SDK specialists. Two frameworks (both Python) behind one orchestrator, and a deliberate contrast between per-step durability (with Temporal's framework contrib) and coarse-grained, single-activity durability (without). | [`demo6a-different-sdks/README.md`](demo6a-different-sdks/README.md) |
+| [`demo6b-different-languages`](demo6b-different-languages/) | Heterogeneity axis 2 — **a different language**. The travel planner is reimplemented in **Java with Spring AI**, invoked from the Python orchestrator over the same Nexus boundary the F1 expert uses. Shows that the orchestration is language-agnostic, and that a cross-language specialist can still get per-step durability via Temporal's Spring AI integration. | [`demo6b-different-languages/README.md`](demo6b-different-languages/README.md) |
 
 ## How to work through the workshop
 
@@ -33,11 +34,12 @@ Every demo uses a distinct Temporal task queue, so workers can run side-by-side 
 - **[uv](https://docs.astral.sh/uv/)** — `brew install uv` on macOS.
 - **[Temporal CLI](https://docs.temporal.io/cli)** — `brew install temporal` on macOS.
 - **OpenAI API key** — set as `OPENAI_API_KEY`.
-- **F1 MCP server** (demo3 and demo4 only) — a Node.js + Python hybrid that wraps [FastF1](https://docs.fastf1.dev/). Expected at `~/Projects/Temporal/AI/MCP/f1-mcp-server/`; override with `F1_MCP_SERVER_HOME`. See each demo's README for details.
+- **F1 MCP server** (demos 3–6) — a Node.js + Python hybrid that wraps [FastF1](https://docs.fastf1.dev/). Expected at `~/Projects/Temporal/AI/MCP/f1-mcp-server/`; override with `F1_MCP_SERVER_HOME`. See each demo's README for details.
+- **JDK 21+ and Maven** (demo6b only) — the travel planner is a Java + Spring AI worker. A Maven wrapper (`./mvnw`) is included, so a system Maven is optional.
 
 ## Observing what Temporal gives you
 
-All demos are Temporal workflows, so you can watch them in the Temporal Web UI at http://localhost:8233. The comparisons between demos are most interesting in that UI — demo2's tool calls appear as activities automatically, demo3 adds MCP listTools/callTool activities, demo4 shows a workflow that suspends durably on `wait_condition` and later receives a signal, and demo6 puts per-step (OpenAI Agents) and single-activity (Strands) durability side by side.
+All demos are Temporal workflows, so you can watch them in the Temporal Web UI at http://localhost:8233. The comparisons between demos are most interesting in that UI — demo2's tool calls appear as activities automatically, demo3 adds MCP listTools/callTool activities, demo4 shows a workflow that suspends durably on `wait_condition` and later receives a signal, and demo6a puts per-step (OpenAI Agents) and single-activity (Strands) durability side by side. demo6b goes further: the Java travel planner runs as its own workflow with per-step LLM/tool activities, all driven by a Python orchestrator across a Nexus boundary.
 
 Demos 2–6 also send traces to OpenAI's trace dashboard at https://platform.openai.com/traces, so you can see the agent's reasoning alongside the Temporal-side history.
 
@@ -54,7 +56,9 @@ temporal-ai-agents/
 ├── demo3-mcp/
 ├── demo4-hitl/
 ├── demo5-multi-agent/
-└── demo6-heterogeneous-agent-orchestration/
+├── demo6a-different-sdks/                      # heterogeneity axis 1: different frameworks
+└── demo6b-different-languages/                 # heterogeneity axis 2: different language (Java/Spring AI)
+    └── travel-planner-java/                    # Java + Spring AI travel-planner worker (Nexus)
 ```
 
 ## Related

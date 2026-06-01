@@ -1,0 +1,34 @@
+# ABOUTME: Spring Boot config for the Java travel-planner worker.
+# Wires the OpenAI ChatModel, the Temporal connection, and one worker hosting the
+# travel-planner workflow, its tool activity, and the cross-language Nexus service.
+spring:
+  application:
+    name: travel-planner-java
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  ai:
+    # Let Temporal own retries, not Spring AI's client.
+    retry:
+      max-attempts: 1
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: gpt-4o
+  temporal:
+    namespace: default
+    connection:
+      target: localhost:7233
+    workers:
+      - task-queue: travel-planner-agent-tq
+        name: travel-worker
+        workflow-classes:
+          - io.temporal.ai.workshop.travel.TravelPlannerAgentWorkflowImpl
+        # The travel tools run as durable Temporal activities (one per tool call).
+        activity-beans:
+          - travelToolsImpl
+        # Cross-language Nexus handler bean. (Alternative: annotate the impl with
+        # @io.temporal.spring.boot.NexusServiceImpl(workers = "travel-worker").)
+        nexus-service-beans:
+          - travelPlannerServiceImpl

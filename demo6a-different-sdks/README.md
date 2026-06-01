@@ -1,6 +1,8 @@
-# Demo 6 - Heterogeneous agent orchestration
+# Demo 6a - Heterogeneous agent orchestration: different SDKs
 
-Extends [demo 5](../demo5-multi-agent/) by adding a third specialist — a **travel planner** built with the [Strands Agents SDK](https://strandsagents.com/) — alongside demo5's OpenAI Agents SDK weather forecaster and F1 expert. The orchestrator now drives **two different agent frameworks** through the same Temporal primitives, demonstrating that the orchestration is framework-agnostic.
+Heterogeneity has more than one axis. This is **axis 1 — different agent frameworks**, same language. (See [demo 6b](../demo6b-different-languages/) for **axis 2 — a different language**, where the travel planner is reimplemented in Java with Spring AI.)
+
+Extends [demo 5](../demo5-multi-agent/) by adding a third specialist — a **travel planner** built with the [Strands Agents SDK](https://strandsagents.com/) — alongside demo5's OpenAI Agents SDK weather forecaster and F1 expert. The orchestrator now drives **two different agent frameworks** (both Python) through the same Temporal primitives, demonstrating that the orchestration is framework-agnostic.
 
 The pedagogical contrast: the OpenAI agents in demos 2–5 use `temporalio.contrib.openai_agents` and get **per-step durability** — every LLM call and every tool call is its own Temporal activity. The Strands agent has no Temporal contrib, so we wrap the entire agent loop in a single activity. That gives **coarse-grained durability** (the activity retries on worker failure) without per-step history. Demo 6 puts both styles in the same workflow so you can see the trade-off.
 

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ABOUTME: Maven build for the Java + Spring AI travel-planner Temporal worker (demo6b). -->
+<!-- Exposes a Nexus service the Python orchestrator calls cross-language; LLM/tool calls are activities. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.12</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.temporal.ai.workshop</groupId>
+    <artifactId>travel-planner-java</artifactId>
+    <version>0.1.0</version>
+    <name>travel-planner-java</name>
+    <description>Java + Spring AI travel planner, exposed to the Python orchestrator over Temporal Nexus</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring-ai.version>1.1.0</spring-ai.version>
+        <temporal.version>1.35.0</temporal.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring AI OpenAI model: auto-configures the ChatModel bean from spring.ai.openai.* -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
+        <!-- Temporal Java SDK (workflows, activities, Nexus handler APIs) -->
+        <dependency>
+            <groupId>io.temporal</groupId>
+            <artifactId>temporal-sdk</artifactId>
+            <version>${temporal.version}</version>
+        </dependency>
+
+        <!-- Spring Boot auto-config for the Temporal client/worker factory -->
+        <dependency>
+            <groupId>io.temporal</groupId>
+            <artifactId>temporal-spring-boot-starter</artifactId>
+            <version>${temporal.version}</version>
+        </dependency>
+
+        <!-- Makes the Spring AI tool-calling loop durable: each LLM call and each
+             tool call becomes a Temporal activity (SpringAiPlugin + TemporalChatClient). -->
+        <dependency>
+            <groupId>io.temporal</groupId>
+            <artifactId>temporal-spring-ai</artifactId>
+            <version>${temporal.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>io.temporal.ai.workshop.travel.WorkerApplication</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
