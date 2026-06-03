@@ -15,7 +15,8 @@ tags:
 - python
 - temporal
 owner: temporal
-developers: []
+developers:
+- marcus.merrell@temporal.io
 show_timer: true
 idle_timeout: 7200
 timelimit: 14400
@@ -27,5 +28,5 @@ lab_config:
   hideStopButton: false
   default_layout: AssignmentLeft
   default_layout_sidebar_size: 40
-checksum: "12138858173647619418"
+checksum: "11396519553797006296"
 enhanced_loading: false
