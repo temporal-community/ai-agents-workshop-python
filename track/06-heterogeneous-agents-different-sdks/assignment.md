@@ -1,6 +1,6 @@
 ---
 slug: heterogeneous-agents-different-sdks
-id: 5ypjll3mxc0b
+id: v9xxp83onfps
 type: challenge
 title: 'Demo 6a: Heterogeneous Agents — Different SDKs'
 teaser: Two frameworks, one orchestrator. A Strands agent joins the OpenAI agents
@@ -33,32 +33,32 @@ notes:
     and F1 paths show detailed per-step activities; the travel planner path
     shows a single opaque `ask_travel_planner` activity event.
 tabs:
-- id: ax9nldup6nmj
+- id: p2zrois2si7k
   title: Worker PA
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6a-different-sdks
-- id: srjgxyxxytgp
+- id: lid9wwwzzpiv
   title: Worker F1
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6a-different-sdks
-- id: xbfchwwu16fp
+- id: s96vbrx0nz2t
   title: Starter
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6a-different-sdks
-- id: pfxv89cjkmvl
+- id: j78qnmqyifdj
   title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- id: 62y6od0vrop1
+- id: 9onpnlwggtkx
   title: Network Control Panel
   type: service
   hostname: workshop-host
   port: 5000
-- id: rpor6tvajxnn
+- id: v5qxuwujv3fq
   title: Editor
   type: service
   hostname: workshop-host

@@ -1,5 +1,6 @@
 ---
 slug: heterogeneous-agents-different-languages
+id: zymyevd2ueql
 type: challenge
 title: 'Demo 6b: Heterogeneous Agents — Different Languages'
 teaser: Same orchestrator, Java specialist. The travel planner moves to Spring AI
@@ -25,31 +26,38 @@ notes:
     Three workers, three languages of expertise, one Python orchestrator. The
     orchestration is language-agnostic.
 tabs:
-- title: Java Worker
+- id: ik6nxearodvs
+  title: Java Worker
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6b-different-languages/travel-planner-java
-- title: Worker PA
+- id: imhtag31jfda
+  title: Worker PA
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6b-different-languages
-- title: Worker F1
+- id: cqyr6hy4mbnu
+  title: Worker F1
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6b-different-languages
-- title: Starter
+- id: eubue1eoyne5
+  title: Starter
   type: terminal
   hostname: workshop-host
   workdir: /workspace/workshop/demo6b-different-languages
-- title: Temporal UI
+- id: hdnyu7av8sdn
+  title: Temporal UI
   type: service
   hostname: workshop-host
   port: 8233
-- title: Network Control Panel
+- id: 7oij6xgvxizw
+  title: Network Control Panel
   type: service
   hostname: workshop-host
   port: 5000
-- title: Editor
+- id: hybfi67dsrfp
+  title: Editor
   type: service
   hostname: workshop-host
   port: 8080
