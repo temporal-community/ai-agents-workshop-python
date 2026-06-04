@@ -30,3 +30,12 @@ lab_config:
   default_layout_sidebar_size: 40
 checksum: "10702015527777864456"
 enhanced_loading: false
+challenges:
+- slug: environment-setup
+- slug: agentic-loop
+- slug: openai-agents-sdk
+- slug: mcp-tools
+- slug: human-in-the-loop
+- slug: multi-agent
+- slug: heterogeneous-agents-different-sdks
+- slug: heterogeneous-agents-different-languages
