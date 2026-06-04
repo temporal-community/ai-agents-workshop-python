@@ -1,0 +1,6 @@
+version: "3"
+virtualmachines:
+- name: workshop-host
+  image: ubuntu-2204-lts
+  shell: /bin/bash
+  machine_type: n1-standard-2

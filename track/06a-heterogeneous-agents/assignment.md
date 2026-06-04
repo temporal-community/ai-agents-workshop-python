@@ -1,31 +1,31 @@
 ---
-slug: heterogeneous-agents
+slug: heterogeneous-agents-different-sdks
 id: 5ypjll3mxc0b
 type: challenge
-title: 'Demo 6: Heterogeneous Agent Orchestration'
+title: 'Demo 6a: Heterogeneous Agents — Different SDKs'
 teaser: Two frameworks, one orchestrator. A Strands agent joins the OpenAI agents
   behind the same Temporal primitives.
 notes:
 - type: text
   contents: |
-    ## Demo 6: Heterogeneous Agent Orchestration
+    ## Demo 6a: Heterogeneous Agents — Different SDKs
 
     Demo 5 had two specialists, both built with the OpenAI Agents SDK.
-    Demo 6 adds a third specialist built with a completely different framework:
+    Demo 6a adds a third specialist built with a completely different framework:
     **Strands Agents SDK**.
 
     The key lesson: Temporal's orchestration is framework-agnostic. The
     personal assistant orchestrator doesn't care what framework its specialists
-    use -- it just calls tools.
+    use — it just calls tools.
 
     The **travel planner** (Strands) is wired in as a plain activity rather
     than a child workflow. That's the integration trade-off:
 
-    - **OpenAI agents** (weather, F1): per-step durability -- every LLM call
+    - **OpenAI agents** (weather, F1): per-step durability — every LLM call
       and every tool call is its own Temporal activity. If a worker dies
       mid-loop, only the failing step retries.
 
-    - **Strands agent** (travel planner): coarse-grained durability -- the
+    - **Strands agent** (travel planner): coarse-grained durability — the
       entire agent loop is one activity. If the worker dies, the whole loop
       restarts. But the Strands agent itself has zero Temporal imports.
 
@@ -37,17 +37,17 @@ tabs:
   title: Worker PA
   type: terminal
   hostname: workshop-host
-  workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
+  workdir: /workspace/workshop/demo6a-different-sdks
 - id: srjgxyxxytgp
   title: Worker F1
   type: terminal
   hostname: workshop-host
-  workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
+  workdir: /workspace/workshop/demo6a-different-sdks
 - id: xbfchwwu16fp
   title: Starter
   type: terminal
   hostname: workshop-host
-  workdir: /workspace/workshop/demo6-heterogeneous-agent-orchestration
+  workdir: /workspace/workshop/demo6a-different-sdks
 - id: pfxv89cjkmvl
   title: Temporal UI
   type: service
@@ -68,22 +68,22 @@ timelimit: 1800
 enhanced_loading: null
 ---
 
-# Demo 6: Heterogeneous Agent Orchestration
+# Demo 6a: Heterogeneous Agents — Different SDKs
 
 ## What changed
 
-Click the **Editor** tab and open `demo6-heterogeneous-agent-orchestration`.
+Click the **Editor** tab and open `demo6a-different-sdks`.
 
 New files compared to demo5:
 
-- `travel_planner.py` - the Strands travel agent. **Zero Temporal imports.**
+- `travel_planner.py` — the Strands travel agent. **Zero Temporal imports.**
   It could be a library vendored from another team's codebase.
-- `travel_planner_activity.py` - a single `@activity.defn` wrapper owned by
+- `travel_planner_activity.py` — a single `@activity.defn` wrapper owned by
   the personal-assistant team. It lazy-imports `travel_planner` and calls
   `run()`. One file, ~10 lines.
-- `personal_assistant.py` - now wires three tools: `ask_weather_agent`
+- `personal_assistant.py` — now wires three tools: `ask_weather_agent`
   (child workflow), `ask_f1_expert` (Nexus), and `ask_travel_planner`
-  (direct activity -- no sub-workflow).
+  (direct activity — no sub-workflow).
 
 ## Run it
 
@@ -109,7 +109,7 @@ demo5. You should see:
 
 - `StartChildWorkflowExecution` for the weather agent (same as demo5)
 - `NexusOperationScheduled` / `NexusOperationCompleted` for the F1 expert (same as demo5)
-- **A single `ScheduleActivityTask: ask_travel_planner`** -- the entire Strands
+- **A single `ScheduleActivityTask: ask_travel_planner`** — the entire Strands
   agent loop, all its LLM calls and tool calls, is opaque inside this one event
 
 That contrast is the point. The weather and F1 specialists show per-step history.

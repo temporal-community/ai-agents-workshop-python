@@ -41,6 +41,16 @@ apt-get install -y --no-install-recommends \
     bash-completion \
     python3.10-venv
 
+# 1b. JDK 21 (required by demo6b travel-planner-java / Spring AI)
+# Use the Eclipse Temurin distribution via the Adoptium APT repo.
+curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public \
+    | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg
+echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb jammy main" \
+    > /etc/apt/sources.list.d/adoptium.list
+apt-get update
+apt-get install -y temurin-21-jdk
+java -version
+
 # Make python resolve to the system python3 (3.10 on Ubuntu 22.04)
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 python --version
@@ -67,11 +77,20 @@ git clone \
     "${WORKSPACE}/workshop"
 
 # 6. Install Python dependencies for all demos
-for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent demo6-heterogeneous-agent-orchestration; do
+for demo in demo1-agentic-loop demo2-openai-temporal-integration demo3-mcp demo4-hitl demo5-multi-agent demo6a-different-sdks demo6b-different-languages; do
     pushd "${WORKSPACE}/workshop/${demo}"
     uv sync
     popd
 done
+
+# 6b. Pre-fetch Maven dependencies for the Java travel-planner so participants
+# don't wait for a cold download when they run ./mvnw spring-boot:run.
+# dependency:go-offline resolves all compile/runtime deps into the local repo.
+pushd "${WORKSPACE}/workshop/demo6b-different-languages/travel-planner-java"
+# Make the Maven wrapper executable (git may not preserve the bit through clone).
+chmod +x mvnw
+./mvnw -q dependency:go-offline --no-transfer-progress || true
+popd
 
 # 7. F1 MCP server (rakeshgangwar/f1-mcp-server, pinned commit)
 #    COMMIT PIN: Update this SHA before each workshop by running:
@@ -604,13 +623,21 @@ temporal operator nexus endpoint create \
     --address 127.0.0.1:7233 || true
 echo "Nexus endpoint f1-expert registered (or already exists)"
 
-# demo6: f1-expert-d6
+# demo6a: f1-expert-d6
 temporal operator nexus endpoint create \
     --name f1-expert-d6 \
     --target-namespace default \
     --target-task-queue f1-expert-agent-tq \
     --address 127.0.0.1:7233 || true
 echo "Nexus endpoint f1-expert-d6 registered (or already exists)"
+
+# demo6b: travel-planner (Java Spring AI worker)
+temporal operator nexus endpoint create \
+    --name travel-planner \
+    --target-namespace default \
+    --target-task-queue travel-planner-agent-tq \
+    --address 127.0.0.1:7233 || true
+echo "Nexus endpoint travel-planner registered (or already exists)"
 
 # 12. Shell environment via /etc/bash.bashrc
 cat >> /etc/bash.bashrc <<'BASHRC'
