@@ -120,8 +120,8 @@ fundamentally different visibility depending on how deep the framework integrati
 
 ```
 uv run python -m start_workflow "Tell me about Monaco as a travel destination."
-uv run python -m start_workflow "What's the weather at the next F1 race?"
-uv run python -m start_workflow "Compare the weather at Monaco and Singapore on their Grand Prix dates."
+uv run python -m start_workflow "What's the current weather at the locations of the next two F1 races?"
+uv run python -m start_workflow "When is the next F1 race, what's the weather there right now, and what should I know about visiting?"
 ```
 
 Click **Check** when you've run at least one workflow that invokes the travel planner.

@@ -111,9 +111,9 @@ could independently be deployed on a different team's infrastructure.
 ## Try more prompts
 
 ```
-uv run python -m start_workflow "What is the weather in Monaco?"
+uv run python -m start_workflow "When is the next F1 race and what's the weather there right now?"
+uv run python -m start_workflow "What's the current weather at the locations of the next two F1 races?"
 uv run python -m start_workflow "When is the next F1 race?"
-uv run python -m start_workflow "Compare the weather at Monaco and Singapore on their Grand Prix dates"
 ```
 
 Click **Check** when you've run at least one workflow successfully.
