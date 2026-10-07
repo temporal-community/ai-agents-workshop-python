@@ -44,6 +44,8 @@ def _f1_server_factory() -> MCPServerStdio:
             "args": ["-c", launch],
         },
         cache_tools_list=True,
+        # FastF1 fetches can exceed the Agents SDK's 5s default read timeout.
+        client_session_timeout_seconds=45,
     )
 
 
